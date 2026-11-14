@@ -58,18 +58,29 @@ jobs:
       - name: Push the tested image under a new tag
         env:
           RELEASE_TAG: ${{ inputs.release }}
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           reference="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/vellum-aio:$RELEASE_TAG"
-          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
           if message=$(docker manifest inspect "$reference" 2>&1); then
             echo "Tag already exists: $reference" >&2
             exit 1
           fi
           if ! grep -Eqi 'manifest unknown|no such manifest|name unknown' <<<"$message"; then
-            printf '%s\n' "$message" >&2
-            exit 1
+            # GHCR can deny manifest lookups until the first version creates
+            # the package. Distinguish that case with the GitHub Packages API.
+            account_type=$(gh api "users/$GITHUB_REPOSITORY_OWNER" --jq .type)
+            case "$account_type" in
+              User) package_endpoint="users/$GITHUB_REPOSITORY_OWNER/packages/container/vellum-aio" ;;
+              Organization) package_endpoint="orgs/$GITHUB_REPOSITORY_OWNER/packages/container/vellum-aio" ;;
+              *) exit 1 ;;
+            esac
+            if package=$(gh api --include "$package_endpoint" 2>&1) ||
+               ! grep -Eq '^HTTP/[^ ]+ 404' <<<"$package"; then
+              printf '%s\n' "$message" >&2
+              exit 1
+            fi
           fi
           gzip -dc vellum-aio.tar.gz | docker load
           docker tag vellum-aio:release "$reference"
