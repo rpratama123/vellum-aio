@@ -23,6 +23,8 @@ RUN bun install --frozen-lockfile --ignore-scripts --filter='./cli' --filter='./
       --filter='./gateway' --filter='./credential-executor' --filter='./clients/web' && \
     bun run meta/sync-bundled-copies.ts --plugins-only && \
     bun run assistant/scripts/generate-bundled-plugin-packages.ts
+COPY patches/firefox-request-body.patch /tmp/firefox-request-body.patch
+RUN git apply /tmp/firefox-request-body.patch
 WORKDIR /opt/vellum/clients/web
 RUN bun run openapi-ts && VITE_PLATFORM_MODE=false VITE_APP_VERSION=0.12.7 bun run build
 WORKDIR /opt/vellum

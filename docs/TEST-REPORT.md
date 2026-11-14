@@ -36,3 +36,9 @@ The lifecycle suite uses normal console onboarding, the upstream pairing CLI, re
 | T22 Provenance | PASS | Verified source and dependency pins, local image ID and manifest digest. The Docker archive passed SHA-256 verification and reloaded with the same image configuration ID. Syft generated an SPDX inventory. |
 
 Initial builds exposed a Bun workspace filter that skipped the gateway, a missing Qdrant shared library, a CES module entrypoint that did not launch the process, and nginx temporary paths requiring root. Those failures were corrected before the recorded candidate build.
+
+## Firefox browser regression
+
+The published 0.12.7-aio.1 image returned HTTP 400 for paired chat, settings and telemetry writes in local Firefox 159. The same chat succeeded in Chromium. Browser instrumentation found an empty outbound JSON body in Firefox even though the send function populated `sourceChannel`.
+
+The patched build retained the existing test assistant through container replacement. Fresh browser pairings in headless Firefox 159 and Chromium 159 sent chat through local Caddy HTTPS, received HTTP 202 and persisted the streamed reply from the local model fixture. Settings and telemetry writes returned HTTP 200 in both browsers. The patched image was tested on the workstation.

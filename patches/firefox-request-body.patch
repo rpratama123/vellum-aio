@@ -1,0 +1,15 @@
+--- a/clients/web/src/lib/api-interceptors.ts
++++ b/clients/web/src/lib/api-interceptors.ts
+@@ -344,6 +344,9 @@
+   // body there to avoid buffering large uploads.
++  // Firefox can report a null Request.body after the SDK request is copied
++  // even though blob() still reads its payload. Use the method to decide
++  // whether to read the body in local mode.
+   const body = isLocalClient()
+-    ? request.body
+-      ? await request.blob()
+-      : null
++    ? request.method === "GET" || request.method === "HEAD"
++      ? null
++      : await request.blob()
+     : request.body;
