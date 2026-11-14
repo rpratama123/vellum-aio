@@ -1,0 +1,39 @@
+name: Tag a published image as latest
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Published version tag to promote, for example 0.12.7-aio.1
+        type: string
+        required: true
+permissions:
+  packages: write
+concurrency:
+  group: vellum-aio-publish
+  cancel-in-progress: false
+jobs:
+  tag-latest:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Assign latest to the existing manifest
+        env:
+          RELEASE_TAG: ${{ inputs.release }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+-aio\.[1-9][0-9]*$ ]]
+          image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/vellum-aio"
+          docker run --rm --entrypoint /bin/sh \
+            -e GHCR_TOKEN -e GITHUB_ACTOR \
+            quay.io/skopeo/stable:v1.19.0@sha256:77e6c8901f6976bdfa87b8b14c40b96de754794c492d8ed295f77fba1454a4ab \
+            -ec '
+              source="docker://$1:$2"
+              target="docker://$1:latest"
+              printf "%s" "$GHCR_TOKEN" | skopeo login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+              digest=$(skopeo inspect --format "{{.Digest}}" "$source")
+              skopeo copy --all --preserve-digests "docker://$1@$digest" "$target"
+              test "$(skopeo inspect --format "{{.Digest}}" "$target")" = "$digest"
+              printf "Tagged %s:latest as %s\n" "$1" "$digest"
+            ' sh "$image" "$RELEASE_TAG" | tee -a "$GITHUB_STEP_SUMMARY"
