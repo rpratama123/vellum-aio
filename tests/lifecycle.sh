@@ -23,14 +23,21 @@ trap cleanup EXIT
 launch() {
     "$engine" run -d --name "$name" --stop-timeout 45 -p 127.0.0.1::7840 \
         -v "$volume:/data:Z" "$image" >/dev/null
-    origin="http://$("$engine" port "$name" 7840/tcp | head -1)"
 }
 status() {
     "$engine" exec "$name" vellum-aio status
 }
 wait_for() {
+    # Docker can allocate a new host port each time the container starts.
+    local binding
+    binding=$("$engine" port "$name" 7840/tcp)
+    origin="http://${binding%%$'\n'*}"
     for ((attempt=0; attempt<180; attempt++)); do
         if [[ $(status 2>/dev/null || true) == "$1"* ]]; then
+            if [[ $1 == READY ]] && ! curl -fsS --max-time 2 "$origin/readyz" >/dev/null 2>&1; then
+                sleep 1
+                continue
+            fi
             echo "Observed $1"
             return
         fi
