@@ -1,0 +1,122 @@
+diff --git a/assistant/src/providers/model-catalog.ts b/assistant/src/providers/model-catalog.ts
+index 65b8a3d..7138f01 100644
+--- a/assistant/src/providers/model-catalog.ts
++++ b/assistant/src/providers/model-catalog.ts
+@@ -492,6 +492,66 @@ const RAW_PROVIDER_CATALOG: ProviderCatalogEntry[] = [
+           ],
+         },
+       },
++      {
++        id: "gpt-6.1-sol",
++        displayName: "GPT-6.1 Sol",
++        contextWindowTokens: 1050000,
++        maxOutputTokens: 128000,
++        longContextPricingThresholdTokens:
++          OPENAI_LONG_CONTEXT_PRICING_THRESHOLD_TOKENS,
++        supportsThinking: true,
++        supportsCaching: true,
++        supportsVision: true,
++        supportsToolUse: true,
++        supportsPromptCacheBreakpoints: true,
++        maxEffort: "max",
++        supportedEfforts: ["low", "medium", "high", "xhigh", "max"],
++        pricing: {
++          inputPer1mTokens: 2,
++          outputPer1mTokens: 10,
++          cacheWritePer1mTokens: 2.5,
++          cacheReadPer1mTokens: 0.1,
++          tiers: [
++            {
++              inputTokenThreshold: OPENAI_LONG_CONTEXT_PRICING_THRESHOLD_TOKENS,
++              inputPer1mTokens: 4,
++              outputPer1mTokens: 15,
++              cacheWritePer1mTokens: 5,
++              cacheReadPer1mTokens: 0.2,
++            },
++          ],
++        },
++      },
++      {
++        id: "gpt-6.1-terra",
++        displayName: "GPT-6.1 Terra",
++        contextWindowTokens: 1050000,
++        maxOutputTokens: 128000,
++        longContextPricingThresholdTokens:
++          OPENAI_LONG_CONTEXT_PRICING_THRESHOLD_TOKENS,
++        supportsThinking: true,
++        supportsCaching: true,
++        supportsVision: true,
++        supportsToolUse: true,
++        supportsPromptCacheBreakpoints: true,
++        maxEffort: "max",
++        supportedEfforts: ["low", "medium", "high", "xhigh", "max"],
++        pricing: {
++          inputPer1mTokens: 1,
++          outputPer1mTokens: 5,
++          cacheWritePer1mTokens: 1.25,
++          cacheReadPer1mTokens: 0.1,
++          tiers: [
++            {
++              inputTokenThreshold: OPENAI_LONG_CONTEXT_PRICING_THRESHOLD_TOKENS,
++              inputPer1mTokens: 2,
++              outputPer1mTokens: 7.5,
++              cacheWritePer1mTokens: 2.5,
++              cacheReadPer1mTokens: 0.2,
++            },
++          ],
++        },
++      },
+       {
+         id: "gpt-6-sol",
+         displayName: "GPT-6 Sol",
+diff --git a/assistant/src/providers/openai/codex-models.ts b/assistant/src/providers/openai/codex-models.ts
+index e3e66be..4073e15 100644
+--- a/assistant/src/providers/openai/codex-models.ts
++++ b/assistant/src/providers/openai/codex-models.ts
+@@ -10,6 +10,8 @@
+  */
+ export const CODEX_SUBSCRIPTION_MODEL_IDS: ReadonlySet<string> = new Set([
+   "gpt-6-astra",
++  "gpt-6.1-sol",
++  "gpt-6.1-terra",
+   "gpt-6-sol",
+   "gpt-6-luna",
+   "gpt-5.6-sol",
+diff --git a/clients/web/src/assistant/llm-model-catalog.ts b/clients/web/src/assistant/llm-model-catalog.ts
+index 93ad9a1..d644f45 100644
+--- a/clients/web/src/assistant/llm-model-catalog.ts
++++ b/clients/web/src/assistant/llm-model-catalog.ts
+@@ -190,6 +190,24 @@ export const MODELS_BY_PROVIDER = {
+       supportsThinking: true,
+       longContextPricingThresholdTokens: 272_000,
+     },
++    {
++      id: "gpt-6.1-sol",
++      displayName: "GPT-6.1 Sol",
++      contextWindowTokens: 1_050_000,
++      defaultContextWindowTokens: 272_000,
++      maxOutputTokens: 128_000,
++      supportsThinking: true,
++      longContextPricingThresholdTokens: 272_000,
++    },
++    {
++      id: "gpt-6.1-terra",
++      displayName: "GPT-6.1 Terra",
++      contextWindowTokens: 1_050_000,
++      defaultContextWindowTokens: 500_000,
++      maxOutputTokens: 128_000,
++      supportsThinking: true,
++      longContextPricingThresholdTokens: 272_000,
++    },
+     {
+       id: "gpt-6-sol",
+       displayName: "GPT-6 Sol",
+@@ -1488,6 +1506,8 @@ export function getManagedUpstreamForModel(
+ // the settings domain re-exports it from codex-subscription-models.
+ export const CODEX_SUBSCRIPTION_MODEL_IDS: ReadonlySet<string> = new Set([
+   "gpt-6-astra",
++  "gpt-6.1-sol",
++  "gpt-6.1-terra",
+   "gpt-6-sol",
+   "gpt-6-luna",
+   "gpt-5.6-sol",

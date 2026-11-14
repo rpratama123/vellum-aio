@@ -1,0 +1,2144 @@
+diff --git a/assistant/src/__tests__/config-schema.test.ts b/assistant/src/__tests__/config-schema.test.ts
+index bc7b908..63c8bdf 100644
+--- a/assistant/src/__tests__/config-schema.test.ts
++++ b/assistant/src/__tests__/config-schema.test.ts
+@@ -471,7 +471,9 @@ describe("AssistantConfigSchema", () => {
+     expect(
+       AssistantConfigSchema.safeParse({
+         llm: {
+-          profiles: { custom: { provider: "chatgpt", model: "gpt-4o" } },
++          profiles: {
++            custom: { provider: "chatgpt", model: "invalid model id" },
++          },
+         },
+       }).success,
+     ).toBe(false);
+@@ -2192,8 +2194,9 @@ describe("032-tts-provider-unification migration", () => {
+     writeMigConfig({
+       calls: { voice: { ttsProvider: "fish-audio" } },
+     });
+-    const { ttsProviderUnificationMigration } =
+-      await import("../workspace/migrations/032-tts-provider-unification.js");
++    const { ttsProviderUnificationMigration } = await import(
++      "../workspace/migrations/032-tts-provider-unification.js"
++    );
+     await ttsProviderUnificationMigration.run(migrationDir);
+     const result = readMigConfig();
+     const tts = (result.services as Record<string, unknown>).tts as Record<
+@@ -2209,8 +2212,9 @@ describe("032-tts-provider-unification migration", () => {
+       calls: { voice: { ttsProvider: "elevenlabs" } },
+       elevenlabs: { voiceId: "my-voice", speed: 0.8 },
+     });
+-    const { ttsProviderUnificationMigration } =
+-      await import("../workspace/migrations/032-tts-provider-unification.js");
++    const { ttsProviderUnificationMigration } = await import(
++      "../workspace/migrations/032-tts-provider-unification.js"
++    );
+     await ttsProviderUnificationMigration.run(migrationDir);
+     const result = readMigConfig();
+     const tts = (result.services as Record<string, unknown>).tts as Record<
+@@ -2227,8 +2231,9 @@ describe("032-tts-provider-unification migration", () => {
+       calls: { voice: { ttsProvider: "fish-audio" } },
+       fishAudio: { referenceId: "my-ref", format: "wav" },
+     });
+-    const { ttsProviderUnificationMigration } =
+-      await import("../workspace/migrations/032-tts-provider-unification.js");
++    const { ttsProviderUnificationMigration } = await import(
++      "../workspace/migrations/032-tts-provider-unification.js"
++    );
+     await ttsProviderUnificationMigration.run(migrationDir);
+     const result = readMigConfig();
+     const tts = (result.services as Record<string, unknown>).tts as Record<
+@@ -2245,8 +2250,9 @@ describe("032-tts-provider-unification migration", () => {
+       calls: { voice: { ttsProvider: "elevenlabs", language: "en-US" } },
+       elevenlabs: { voiceId: "my-voice" },
+     });
+-    const { ttsProviderUnificationMigration } =
+-      await import("../workspace/migrations/032-tts-provider-unification.js");
++    const { ttsProviderUnificationMigration } = await import(
++      "../workspace/migrations/032-tts-provider-unification.js"
++    );
+     await ttsProviderUnificationMigration.run(migrationDir);
+     const result = readMigConfig();
+     // Legacy keys removed
+@@ -2275,8 +2281,9 @@ describe("032-tts-provider-unification migration", () => {
+       calls: { voice: { ttsProvider: "fish-audio" } },
+       fishAudio: { referenceId: "my-ref" },
+     });
+-    const { ttsProviderUnificationMigration } =
+-      await import("../workspace/migrations/032-tts-provider-unification.js");
++    const { ttsProviderUnificationMigration } = await import(
++      "../workspace/migrations/032-tts-provider-unification.js"
++    );
+     await ttsProviderUnificationMigration.run(migrationDir);
+     const afterFirst = readMigConfig();
+     await ttsProviderUnificationMigration.run(migrationDir);
+@@ -2289,8 +2296,9 @@ describe("032-tts-provider-unification migration", () => {
+       services: { tts: { provider: "elevenlabs" } },
+       calls: { voice: { ttsProvider: "fish-audio" } },
+     });
+-    const { ttsProviderUnificationMigration } =
+-      await import("../workspace/migrations/032-tts-provider-unification.js");
++    const { ttsProviderUnificationMigration } = await import(
++      "../workspace/migrations/032-tts-provider-unification.js"
++    );
+     await ttsProviderUnificationMigration.run(migrationDir);
+     const result = readMigConfig();
+     const tts = (result.services as Record<string, unknown>).tts as Record<
+@@ -2312,8 +2320,9 @@ describe("032-tts-provider-unification migration", () => {
+       },
+       elevenlabs: { voiceId: "legacy-voice", speed: 0.8 },
+     });
+-    const { ttsProviderUnificationMigration } =
+-      await import("../workspace/migrations/032-tts-provider-unification.js");
++    const { ttsProviderUnificationMigration } = await import(
++      "../workspace/migrations/032-tts-provider-unification.js"
++    );
+     await ttsProviderUnificationMigration.run(migrationDir);
+     const result = readMigConfig();
+     const tts = (result.services as Record<string, unknown>).tts as Record<
+@@ -2330,8 +2339,9 @@ describe("032-tts-provider-unification migration", () => {
+ 
+   test("skips config without any legacy TTS fields", async () => {
+     writeMigConfig({ maxTokens: 4096 });
+-    const { ttsProviderUnificationMigration } =
+-      await import("../workspace/migrations/032-tts-provider-unification.js");
++    const { ttsProviderUnificationMigration } = await import(
++      "../workspace/migrations/032-tts-provider-unification.js"
++    );
+     const before = readMigConfig();
+     await ttsProviderUnificationMigration.run(migrationDir);
+     const after = readMigConfig();
+@@ -2346,8 +2356,9 @@ describe("032-tts-provider-unification migration", () => {
+         tts: { provider: "elevenlabs", mode: "your-own" },
+       },
+     });
+-    const { ttsProviderUnificationMigration } =
+-      await import("../workspace/migrations/032-tts-provider-unification.js");
++    const { ttsProviderUnificationMigration } = await import(
++      "../workspace/migrations/032-tts-provider-unification.js"
++    );
+     await ttsProviderUnificationMigration.down(migrationDir);
+     const result = readMigConfig();
+     const services = result.services as Record<string, unknown>;
+@@ -2698,8 +2709,9 @@ describe("Call entrypoint gating", () => {
+     // Force config reload
+     loadConfig();
+ 
+-    const { executeCallStart: _executeCallStart } =
+-      await import("../tools/calls/call-start.js");
++    const { executeCallStart: _executeCallStart } = await import(
++      "../tools/calls/call-start.js"
++    );
+ 
+     // The tool is registered via side effect. We need to test the gating logic directly.
+     // Since the module registers itself, we test by loading config and checking behavior.
+diff --git a/assistant/src/__tests__/credential-security-invariants.test.ts b/assistant/src/__tests__/credential-security-invariants.test.ts
+index e616b17..b653a54 100644
+--- a/assistant/src/__tests__/credential-security-invariants.test.ts
++++ b/assistant/src/__tests__/credential-security-invariants.test.ts
+@@ -205,6 +205,7 @@ describe("Invariant 2: no generic plaintext secret read API", () => {
+       "providers/inference/resolve-auth.ts", // provider_connection auth resolver (api_key path reads vault, mirrors registry.ts)
+       "providers/inference/codex-token-refresh.ts", // Codex OAuth token refresh (reads/writes access_token, refresh_token, expires_at)
+       "providers/inference/service-account-token.ts", // Google service-account JWT exchange (reads service-account JSON, writes token_cache blob)
++      "providers/inference/chatgpt-plan.ts", // Stores and refreshes direct ChatGPT plan sessions through CES.
+       "providers/inference/chatgpt-subscription-credentials.ts", // ChatGPT subscription sign-in token storage, shared by the daemon routes and the CLI (setSecureKeyAsync only; no reads)
+       "providers/provider-availability.ts", // provider availability API key check
+       "media/image-credentials.ts", // shared image-gen credential resolver (provider API key lookup)
+diff --git a/assistant/src/__tests__/openai-responses-provider.test.ts b/assistant/src/__tests__/openai-responses-provider.test.ts
+index 908614c..2ff2988 100644
+--- a/assistant/src/__tests__/openai-responses-provider.test.ts
++++ b/assistant/src/__tests__/openai-responses-provider.test.ts
+@@ -1848,6 +1848,86 @@ describe("OpenAIResponsesProvider — Native Web Search", () => {
+   // -----------------------------------------------------------------------
+   // codexSubscription — parameter stripping
+   // -----------------------------------------------------------------------
++  test("ChatGPT plan streams a future model with namespaced tools", async () => {
++    const provider = new OpenAIResponsesProvider(
++      "fixture-token",
++      "gpt-future-model",
++      {
++        chatgptPlan: true,
++        baseURL: "https://unused.example.com/v1",
++      },
++    );
++    fakeStreamEvents = [
++      textDeltaEvent("OK"),
++      completedEvent(10, 2, { model: "gpt-future-model" }),
++    ];
++    const response = await provider.sendMessage([userMsg("Hi")], {
++      config: {
++        max_tokens: 8192,
++        effort: "max",
++        verbosity: "medium",
++        promptCacheKey: "test",
++      },
++      systemPrompt: "Follow these instructions",
++      tools: [
++        {
++          name: "test_tool",
++          description: "A fixture tool",
++          input_schema: { type: "object", properties: {} },
++        },
++      ],
++    });
++    expect(response.model).toBe("gpt-future-model");
++    expect(response.content).toEqual([{ type: "text", text: "OK" }]);
++    expect(lastConstructorOptions?.baseURL).toBe("https://api.openai.com/v1");
++    expect(lastStreamParams).toMatchObject({
++      model: "gpt-future-model",
++      store: false,
++      stream: true,
++      instructions: "Follow these instructions",
++      tools: [
++        {
++          type: "namespace",
++          name: "vellum",
++          tools: [{ type: "function", name: "test_tool" }],
++        },
++      ],
++    });
++    for (const field of [
++      "max_output_tokens",
++      "prompt_cache_options",
++      "prompt_cache_key",
++      "reasoning",
++      "text",
++    ]) {
++      expect(lastStreamParams).not.toHaveProperty(field);
++    }
++  });
++
++  test("ChatGPT plan reports a failed stream even after text arrives", async () => {
++    const provider = new OpenAIResponsesProvider(
++      "fixture-token",
++      "gpt-future-model",
++      { chatgptPlan: true },
++    );
++    fakeStreamEvents = [
++      textDeltaEvent("Partial text"),
++      {
++        type: "response.failed",
++        response: {
++          error: { code: "subscription_sharing_usage_limit_exceeded" },
++        },
++      },
++    ];
++    await expect(provider.sendMessage([userMsg("Hi")])).rejects.toThrow(
++      "subscription_sharing_usage_limit_exceeded",
++    );
++    fakeStreamEvents.pop();
++    await expect(provider.sendMessage([userMsg("Hi")])).rejects.toThrow(
++      "without a terminal response",
++    );
++  });
++
+   test("codexSubscription: strips max_output_tokens from params", async () => {
+     const codexProvider = new OpenAIResponsesProvider("sk-test", "gpt-5.4", {
+       codexSubscription: true,
+diff --git a/assistant/src/config/schemas/llm.ts b/assistant/src/config/schemas/llm.ts
+index 92cb910..1642d0d 100644
+--- a/assistant/src/config/schemas/llm.ts
++++ b/assistant/src/config/schemas/llm.ts
+@@ -8,7 +8,7 @@ import {
+   catalogModelSupportsText,
+   PROVIDER_CATALOG,
+ } from "../../providers/model-catalog.js";
+-import { isCodexSubscriptionModel } from "../../providers/openai/codex-models.js";
++import { chatgptModelSlug } from "../../providers/openai/chatgpt-plan-identifiers.js";
+ import {
+   getManagedUpstream,
+   parseVellumModel,
+@@ -186,9 +186,9 @@ export function routingIdentityModelIssue(
+     if (!model) {
+       return 'Provider "chatgpt" requires an explicit model.';
+     }
+-    return isCodexSubscriptionModel(model)
++    return chatgptModelSlug.test(model)
+       ? null
+-      : `Model "${model}" is not served by the ChatGPT subscription (Codex models only).`;
++      : `Model "${model}" is not a valid ChatGPT subscription model ID.`;
+   }
+   return null;
+ }
+diff --git a/assistant/src/daemon/lifecycle.ts b/assistant/src/daemon/lifecycle.ts
+index eeefc6f..5ded524 100644
+--- a/assistant/src/daemon/lifecycle.ts
++++ b/assistant/src/daemon/lifecycle.ts
+@@ -323,6 +323,11 @@ export async function runDaemon(): Promise<void> {
+     }
+     if (migrationsOk) {
+       log.info("Daemon startup: DB initialized");
++      void import("../providers/inference/chatgpt-plan.js")
++        .then(({ startChatgptPlanCatalogRefresh }) =>
++          startChatgptPlanCatalogRefresh(),
++        )
++        .catch(() => log.warn("ChatGPT model discovery could not start"));
+     } else {
+       setDbMigrationFailed(undefined, migrationFailureDetails);
+     }
+diff --git a/assistant/src/ipc/assistant-server.ts b/assistant/src/ipc/assistant-server.ts
+index a4b78ac..8ec7664 100644
+--- a/assistant/src/ipc/assistant-server.ts
++++ b/assistant/src/ipc/assistant-server.ts
+@@ -60,6 +60,7 @@ import { getLogger } from "../util/logger.js";
+ import { mapGatewayIpcConnectError } from "./gateway-ipc-errors.js";
+ import { ACTIVATION_SYNC_IPC_METHODS } from "./routes/activation-sync-ipc-routes.js";
+ import { CHANNEL_REPLY_IPC_METHODS } from "./routes/channel-reply-ipc-routes.js";
++import { CHATGPT_PLAN_IPC_METHODS } from "./routes/chatgpt-plan-ipc-routes.js";
+ import { CONTACTS_INFO_IPC_METHODS } from "./routes/contacts-info-ipc-routes.js";
+ import { CONTACTS_MIRROR_IPC_METHODS } from "./routes/contacts-mirror-ipc-routes.js";
+ import { CONVERSATION_SYNC_IPC_METHODS } from "./routes/conversation-sync-ipc-routes.js";
+@@ -225,6 +226,7 @@ export class AssistantIpcServer {
+       DOCUMENTS_SYNC_IPC_METHODS,
+       ACTIVATION_SYNC_IPC_METHODS,
+       EVENTS_IPC_METHODS,
++      CHATGPT_PLAN_IPC_METHODS,
+     ]) {
+       for (const [operationId, handler] of Object.entries(methodMap)) {
+         this.methods.set(operationId, handler);
+diff --git a/assistant/src/ipc/routes/chatgpt-plan-ipc-routes.ts b/assistant/src/ipc/routes/chatgpt-plan-ipc-routes.ts
+new file mode 100644
+index 0000000..cf8cd6a
+--- /dev/null
++++ b/assistant/src/ipc/routes/chatgpt-plan-ipc-routes.ts
+@@ -0,0 +1,86 @@
++import {
++  BadRequestError,
++  ForbiddenError,
++  ServiceUnavailableError,
++} from "../../runtime/routes/errors.js";
++import type { RouteHandlerArgs } from "../../runtime/routes/types.js";
++
++function requireLocal({ headers }: RouteHandlerArgs) {
++  if (
++    headers?.["x-vellum-principal-type"] !== "local" ||
++    headers["x-vellum-proxy-server"]
++  ) {
++    throw new ForbiddenError("Run this command from the Vellum AIO console.");
++  }
++}
++
++export const CHATGPT_PLAN_IPC_METHODS = {
++  async aio_chatgpt_plan_begin(args: RouteHandlerArgs) {
++    requireLocal(args);
++    const port = args.body?.port;
++    if (
++      typeof port !== "number" ||
++      !Number.isInteger(port) ||
++      port < 1024 ||
++      port > 65535
++    ) {
++      throw new BadRequestError("Invalid ChatGPT callback port.");
++    }
++    const { beginChatgptPlanSignIn } = await import(
++      "../../providers/inference/chatgpt-plan.js"
++    );
++    return beginChatgptPlanSignIn(port, args.body?.newAccount === true);
++  },
++  async aio_chatgpt_plan_finish(args: RouteHandlerArgs) {
++    requireLocal(args);
++    const callback = args.body?.callback;
++    if (
++      typeof callback !== "string" ||
++      callback.length > 16_384 ||
++      !URL.canParse(callback)
++    ) {
++      throw new BadRequestError("Invalid ChatGPT callback URL.");
++    }
++    const { finishChatgptPlanSignIn } = await import(
++      "../../providers/inference/chatgpt-plan.js"
++    );
++    return finishChatgptPlanSignIn(callback);
++  },
++  async aio_chatgpt_plan_refresh(args: RouteHandlerArgs) {
++    requireLocal(args);
++    const { refreshChatgptPlanModels } = await import(
++      "../../providers/inference/chatgpt-plan.js"
++    );
++    const result = await refreshChatgptPlanModels();
++    if (!result) {
++      throw new BadRequestError(
++        "Sign in to ChatGPT before refreshing the model list.",
++      );
++    }
++    return result;
++  },
++  async aio_chatgpt_plan_disconnect(args: RouteHandlerArgs) {
++    requireLocal(args);
++    const { disconnectChatgptPlan } = await import(
++      "../../providers/inference/chatgpt-plan.js"
++    );
++    return disconnectChatgptPlan();
++  },
++  async aio_chatgpt_plan_renew(args: RouteHandlerArgs) {
++    requireLocal(args);
++    const credential = args.body?.credential;
++    if (typeof credential !== "string") {
++      throw new BadRequestError("Missing ChatGPT session reference.");
++    }
++    const { renewChatgptPlanSession } = await import(
++      "../../providers/inference/chatgpt-plan.js"
++    );
++    try {
++      return { renewed: await renewChatgptPlanSession(credential) };
++    } catch {
++      throw new ServiceUnavailableError(
++        "ChatGPT session refresh failed. Reconnect in the Vellum AIO console if the issue persists.",
++      );
++    }
++  },
++};
+diff --git a/assistant/src/providers/__tests__/dispatch-connection-routing.test.ts b/assistant/src/providers/__tests__/dispatch-connection-routing.test.ts
+index c4c4a79..b23b01e 100644
+--- a/assistant/src/providers/__tests__/dispatch-connection-routing.test.ts
++++ b/assistant/src/providers/__tests__/dispatch-connection-routing.test.ts
+@@ -402,12 +402,12 @@ describe("routing identities", () => {
+     });
+   });
+ 
+-  test("resolveRoutingIdentity rejects non-Codex models on the chatgpt route", () => {
+-    expect(() => resolveRoutingIdentity("chatgpt", "gpt-5")).toThrow(
++  test("resolveRoutingIdentity rejects malformed model IDs on the chatgpt route", () => {
++    expect(() => resolveRoutingIdentity("chatgpt", "invalid model id")).toThrow(
+       ConnectionResolutionError,
+     );
+     try {
+-      resolveRoutingIdentity("chatgpt", "gpt-5");
++      resolveRoutingIdentity("chatgpt", "invalid model id");
+     } catch (err) {
+       expect((err as ConnectionResolutionError).reason).toBe(
+         "model_incompatible",
+diff --git a/assistant/src/providers/connection-model-compat.ts b/assistant/src/providers/connection-model-compat.ts
+index c63af91..d85dfb8 100644
+--- a/assistant/src/providers/connection-model-compat.ts
++++ b/assistant/src/providers/connection-model-compat.ts
+@@ -10,8 +10,12 @@
+  */
+ 
+ import type { ProviderConnection } from "./inference/auth.js";
++import { isChatgptPlanCredential } from "./openai/chatgpt-plan-identifiers.js";
+ import { isCodexSubscriptionModel } from "./openai/codex-models.js";
+ 
++type ModelConnection = Pick<ProviderConnection, "auth"> &
++  Partial<Pick<ProviderConnection, "models">>;
++
+ /**
+  * Whether `connection` can serve a request for `model` during
+  * auto-resolution.
+@@ -29,7 +33,7 @@ import { isCodexSubscriptionModel } from "./openai/codex-models.js";
+  * regardless of model.
+  */
+ export function isConnectionCompatibleWithModel(
+-  connection: Pick<ProviderConnection, "auth">,
++  connection: ModelConnection,
+   model: string | undefined,
+ ): boolean {
+   if (connection.auth.type !== "oauth_subscription") {
+@@ -38,7 +42,27 @@ export function isConnectionCompatibleWithModel(
+   if (!model) {
+     return true;
+   }
+-  return isCodexSubscriptionModel(model);
++  return isChatgptPlanCredential(connection.auth.credential)
++    ? (connection.models?.some((entry) => entry.id === model) ?? false)
++    : isCodexSubscriptionModel(model);
++}
++
++/** Validate a ChatGPT identity against the selected connection's catalog. */
++export function chatgptModelAvailabilityIssue(
++  connection: ModelConnection | null,
++  model: string,
++): string | null {
++  if (
++    connection?.auth.type === "oauth_subscription" &&
++    isChatgptPlanCredential(connection.auth.credential)
++  ) {
++    return isConnectionCompatibleWithModel(connection, model)
++      ? null
++      : `Model "${model}" is unavailable through the connected ChatGPT subscription.`;
++  }
++  return isCodexSubscriptionModel(model)
++    ? null
++    : `Model "${model}" is not served by the ChatGPT subscription (Codex models only).`;
+ }
+ 
+ /**
+@@ -50,7 +74,7 @@ export function isConnectionCompatibleWithModel(
+  * should fall through to their existing generic error).
+  */
+ export function describeSubscriptionModelIncompatibility(
+-  candidates: Pick<ProviderConnection, "auth">[],
++  candidates: ModelConnection[],
+   model: string | undefined,
+ ): string | null {
+   if (!model || candidates.length === 0) {
+diff --git a/assistant/src/providers/connection-resolution.ts b/assistant/src/providers/connection-resolution.ts
+index 6186d76..8cf268b 100644
+--- a/assistant/src/providers/connection-resolution.ts
++++ b/assistant/src/providers/connection-resolution.ts
+@@ -370,6 +370,14 @@ export async function tryResolveProviderForConnectionName(
+       );
+     }
+   }
++  if (isChatgptRoute && !isConnectionCompatibleWithModel(connection, model)) {
++    throw new ConnectionResolutionError(
++      connectionName,
++      "model_incompatible",
++      `Model "${model}" is unavailable through the connected ChatGPT subscription.`,
++      { model },
++    );
++  }
+   // `resolveProviderFromConnection` reaches into auth resolution (credential
+   // reads, managed-proxy context). A transient failure there is a soft
+   // miss — log and return null so the caller can treat it the same as
+@@ -739,6 +747,18 @@ export async function preflightResolvedConfig(
+     );
+   }
+ 
++  if (
++    isChatgptRow &&
++    !isConnectionCompatibleWithModel(connection, resolved.model)
++  ) {
++    throw new ConnectionResolutionError(
++      connectionName,
++      "model_incompatible",
++      `Model "${resolved.model}" is unavailable through the connected ChatGPT subscription.`,
++      errorOptions,
++    );
++  }
++
+   switch (connection.auth.type) {
+     case "api_key":
+     case "oauth_subscription":
+diff --git a/assistant/src/providers/inference/adapter-factory.ts b/assistant/src/providers/inference/adapter-factory.ts
+index 3492e20..17fe2ef 100644
+--- a/assistant/src/providers/inference/adapter-factory.ts
++++ b/assistant/src/providers/inference/adapter-factory.ts
+@@ -41,6 +41,7 @@ import { MinimaxProvider } from "../minimax/client.js";
+ import { PROVIDER_CATALOG } from "../model-catalog.js";
+ import { OllamaProvider } from "../ollama/client.js";
+ import { OpenAIChatCompletionsProvider } from "../openai/chat-completions-provider.js";
++import { isChatgptPlanCredential } from "../openai/chatgpt-plan-identifiers.js";
+ import { OpenAIResponsesProvider } from "../openai/responses-provider.js";
+ import { OpenCodeProvider } from "../opencode/client.js";
+ import { OpenRouterProvider } from "../openrouter/client.js";
+@@ -75,6 +76,7 @@ export interface AdapterCreateOpts {
+   useNativeWebSearch: boolean;
+   /** When true, the OpenAI adapter targets the Codex subscription endpoint. */
+   codexSubscription?: boolean;
++  chatgptPlan?: boolean;
+ }
+ 
+ type AdapterFactory = (opts: AdapterCreateOpts) => Provider;
+@@ -115,11 +117,13 @@ const ADAPTER_FACTORIES: Record<string, AdapterFactory> = {
+     baseURL,
+     useNativeWebSearch,
+     codexSubscription,
++    chatgptPlan,
+   }) =>
+     new OpenAIResponsesProvider(apiKey, model, {
+       useNativeWebSearch,
+       streamTimeoutMs,
+       codexSubscription,
++      chatgptPlan,
+       ...(baseURL ? { baseURL } : {}),
+     }),
+   gemini: ({ apiKey, model, streamTimeoutMs, baseURL }) =>
+@@ -601,9 +605,10 @@ function buildConnectionAdapter(
+       ? resolvedAuth.baseUrl
+       : undefined;
+ 
+-  const codexSubscription =
+-    effectiveConnectionAuth(connection).type === "oauth_subscription" &&
+-    provider === "openai";
++  const auth = effectiveConnectionAuth(connection);
++  const subscription =
++    auth.type === "oauth_subscription" && provider === "openai";
++  const chatgptPlan = subscription && isChatgptPlanCredential(auth.credential);
+ 
+   const adapter = buildProviderAdapter(provider, {
+     apiKey,
+@@ -611,7 +616,8 @@ function buildConnectionAdapter(
+     streamTimeoutMs: opts.streamTimeoutMs ?? 1_800_000,
+     baseURL,
+     useNativeWebSearch: opts.useNativeWebSearch ?? false,
+-    codexSubscription,
++    codexSubscription: subscription && !chatgptPlan,
++    chatgptPlan,
+   });
+   if (!adapter) {
+     return null;
+diff --git a/assistant/src/providers/inference/chatgpt-plan.test.ts b/assistant/src/providers/inference/chatgpt-plan.test.ts
+new file mode 100644
+index 0000000..9920ca8
+--- /dev/null
++++ b/assistant/src/providers/inference/chatgpt-plan.test.ts
+@@ -0,0 +1,249 @@
++import { afterAll, expect, mock, test } from "bun:test";
++import { createHash, generateKeyPairSync, sign } from "node:crypto";
++
++import type { ProviderConnection } from "./auth.js";
++
++const secrets = new Map<string, string>();
++let current: ProviderConnection | null = null;
++
++mock.module("../../persistence/db-connection.js", () => ({
++  getDb: () => ({}),
++}));
++mock.module("../../security/secure-keys.js", () => ({
++  getSecureKeyResultAsync: async (key: string) => ({ value: secrets.get(key) }),
++  setSecureKeyAsync: async (key: string, value: string) => {
++    secrets.set(key, value);
++    return true;
++  },
++  deleteSecureKeyAsync: async (key: string) =>
++    secrets.delete(key) ? "deleted" : "not-found",
++}));
++mock.module("./connections.js", () => ({
++  getConnection: () => current,
++  createConnection: (_db: unknown, input: ProviderConnection) => {
++    current = input;
++    return { ok: true };
++  },
++  updateConnection: (
++    _db: unknown,
++    _name: string,
++    input: Partial<ProviderConnection>,
++  ) => {
++    current = { ...current!, ...input };
++    return { ok: true };
++  },
++}));
++
++const {
++  beginChatgptPlanSignIn,
++  disconnectChatgptPlan,
++  finishChatgptPlanSignIn,
++  getChatgptPlanAccessToken,
++  refreshChatgptPlanModels,
++  renewChatgptPlanSession,
++} = await import("./chatgpt-plan.js");
++const { chatgptModelAvailabilityIssue } = await import(
++  "../connection-model-compat.js"
++);
++
++const actualFetch = globalThis.fetch;
++afterAll(() => {
++  globalThis.fetch = actualFetch;
++});
++
++test("registers, validates OAuth, uses fresh account models, rotates tokens once, and revokes", async () => {
++  const keys = generateKeyPairSync("rsa", { modulusLength: 2048 });
++  const clientId = "oaiapp_fixture";
++  const scope =
++    "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct";
++  let authorize: URL;
++  let nonceMatches = false;
++  let scopeGranted = true;
++  let models = [
++    {
++      slug: "gpt-future-model",
++      display_name: "GPT Future",
++      visibility: "list",
++    },
++  ];
++  let refreshCount = 0;
++  let modelStatus = 200;
++  const token = "fixture-initial";
++  const rotated = "fixture-rotated";
++
++  globalThis.fetch = Object.assign(
++    async (input: RequestInfo | URL, init?: RequestInit) => {
++      const url = String(input);
++      if (url === "https://auth.openai.com/.well-known/jwks.json") {
++        return Response.json({
++          keys: [
++            { ...keys.publicKey.export({ format: "jwk" }), kid: "fixture" },
++          ],
++        });
++      }
++      if (url === "https://auth.openai.com/api/accounts/oauth/token") {
++        const form = init?.body as URLSearchParams;
++        expect(form.get("client_id")).toBe(clientId);
++        expect(form.get("resource")).toBe("https://api.openai.com/v1");
++        expect(init?.redirect).toBe("error");
++        if (form.get("grant_type") === "refresh_token") {
++          expect(form.get("refresh_token")).toBe("fixture-refresh");
++          refreshCount++;
++          return Response.json({
++            access_token: rotated,
++            refresh_token: "fixture-refresh-rotated",
++            token_type: "Bearer",
++            expires_in: 3600,
++          });
++        }
++        const verifier = form.get("code_verifier")!;
++        expect(form.get("redirect_uri")).toBe(
++          authorize.searchParams.get("redirect_uri")!,
++        );
++        expect(createHash("sha256").update(verifier).digest("base64url")).toBe(
++          authorize.searchParams.get("code_challenge")!,
++        );
++        const header = Buffer.from(
++          JSON.stringify({ alg: "RS256", kid: "fixture" }),
++        ).toString("base64url");
++        const payload = Buffer.from(
++          JSON.stringify({
++            iss: "https://auth.openai.com",
++            aud: clientId,
++            sub: "fixture-subject",
++            nonce: nonceMatches ? authorize.searchParams.get("nonce") : "wrong",
++            exp: Math.floor(Date.now() / 1000) + 180,
++          }),
++        ).toString("base64url");
++        const signature = sign(
++          "RSA-SHA256",
++          Buffer.from(`${header}.${payload}`),
++          keys.privateKey,
++        ).toString("base64url");
++        return Response.json({
++          access_token: token,
++          refresh_token: "fixture-refresh",
++          token_type: "Bearer",
++          scope: scopeGranted ? scope : "openid",
++          expires_in: 60,
++          id_token: `${header}.${payload}.${signature}`,
++        });
++      }
++      if (url === "https://api.openai.com/v1/models") {
++        const auth = new Headers(init?.headers).get("Authorization");
++        expect(auth).toBe(`Bearer ${refreshCount ? rotated : token}`);
++        return Response.json(
++          {
++            models: [
++              ...models,
++              {
++                slug: "hidden-model",
++                display_name: "Hidden",
++                visibility: "internal",
++              },
++            ],
++          },
++          { status: modelStatus },
++        );
++      }
++      if (url === "https://auth.openai.com/api/accounts/oauth/revoke") {
++        const form = init?.body as URLSearchParams;
++        expect(form.get("client_id")).toBe(clientId);
++        expect(form.get("token")).toBe("fixture-refresh-rotated");
++        return new Response(null, { status: 200 });
++      }
++      throw new Error("Unexpected network request in test");
++    },
++    actualFetch,
++  );
++
++  async function start() {
++    authorize = new URL((await beginChatgptPlanSignIn(1455, false)).url);
++    expect(authorize.origin + authorize.pathname).toBe(
++      "https://auth.openai.com/api/accounts/authorize",
++    );
++    expect(authorize.searchParams.get("code_challenge_method")).toBe("S256");
++    const callback = new URL(authorize.searchParams.get("redirect_uri")!);
++    callback.search = new URLSearchParams({
++      code: "fixture-code",
++      client_id: clientId,
++      state: authorize.searchParams.get("state")!,
++    }).toString();
++    return callback;
++  }
++
++  const callback = await start();
++  const host = authorize!.searchParams.get("ext_agent_host_id");
++  expect(host).toMatch(/^urn:uuid:/);
++  expect(authorize!.searchParams.get("client_id")).toBe("dynamic_agent_client");
++  const wrongState = new URL(callback);
++  wrongState.searchParams.set("state", "wrong-state");
++  await expect(finishChatgptPlanSignIn(wrongState.href)).rejects.toThrow(
++    "pending attempt",
++  );
++  await expect(finishChatgptPlanSignIn(callback.href)).rejects.toThrow(
++    "verify the ChatGPT ID token",
++  );
++  expect(current).toBeNull();
++
++  nonceMatches = true;
++  scopeGranted = false;
++  await expect(finishChatgptPlanSignIn((await start()).href)).rejects.toThrow(
++    "permission was not granted",
++  );
++  expect(current).toBeNull();
++
++  scopeGranted = true;
++  expect(await finishChatgptPlanSignIn((await start()).href)).toEqual({
++    models: 1,
++  });
++  expect(authorize!.searchParams.get("ext_agent_host_id")).toBe(host);
++  expect(current?.models).toEqual([
++    { id: "gpt-future-model", displayName: "GPT Future" },
++  ]);
++  expect(chatgptModelAvailabilityIssue(current, "gpt-future-model")).toBeNull();
++  expect(chatgptModelAvailabilityIssue(current, "gpt-6.1-sol")).toContain(
++    "unavailable",
++  );
++  const auth = current?.auth;
++  if (auth?.type !== "oauth_subscription") {
++    throw new Error("OAuth connection was not created");
++  }
++  expect(
++    await Promise.all([
++      renewChatgptPlanSession(auth.credential),
++      renewChatgptPlanSession(auth.credential),
++    ]),
++  ).toEqual([true, true]);
++  expect(await getChatgptPlanAccessToken(auth.credential)).toBe(rotated);
++  expect(refreshCount).toBe(1);
++  expect(
++    await getChatgptPlanAccessToken("credential/chatgpt/access_token"),
++  ).toBeUndefined();
++
++  models = [
++    {
++      slug: "gpt-future-replacement",
++      display_name: "GPT Future Replacement",
++      visibility: "list",
++    },
++  ];
++  modelStatus = 503;
++  await expect(refreshChatgptPlanModels()).rejects.toThrow("HTTP 503");
++  expect(chatgptModelAvailabilityIssue(current, "gpt-future-model")).toBeNull();
++  modelStatus = 200;
++  await expect(refreshChatgptPlanModels()).resolves.toEqual({ models: 1 });
++  expect(chatgptModelAvailabilityIssue(current, "gpt-future-model")).toContain(
++    "unavailable",
++  );
++  expect(
++    chatgptModelAvailabilityIssue(current, "gpt-future-replacement"),
++  ).toBeNull();
++
++  expect(await disconnectChatgptPlan()).toEqual({ revoked: true });
++  expect(secrets.has(auth.credential)).toBe(false);
++  expect(current?.models).toEqual([]);
++  await start();
++  expect(authorize!.searchParams.get("client_id")).toBe(clientId);
++  expect(authorize!.searchParams.get("agent_name_hint")).toBeNull();
++});
+diff --git a/assistant/src/providers/inference/chatgpt-plan.ts b/assistant/src/providers/inference/chatgpt-plan.ts
+new file mode 100644
+index 0000000..8b6e62a
+--- /dev/null
++++ b/assistant/src/providers/inference/chatgpt-plan.ts
+@@ -0,0 +1,590 @@
++import {
++  createHash,
++  createPublicKey,
++  randomBytes,
++  randomUUID,
++  verify,
++} from "node:crypto";
++import { z } from "zod";
++
++import { getDb } from "../../persistence/db-connection.js";
++import {
++  chatgptModelSlug,
++  isChatgptPlanCredential,
++} from "../openai/chatgpt-plan-identifiers.js";
++import {
++  deleteSecureKeyAsync,
++  getSecureKeyResultAsync,
++  setSecureKeyAsync,
++} from "../../security/secure-keys.js";
++import { getLogger } from "../../util/logger.js";
++import { CHATGPT_SUBSCRIPTION_CONNECTION_NAME } from "./auth.js";
++import {
++  createConnection,
++  getConnection,
++  updateConnection,
++} from "./connections.js";
++
++const log = getLogger("chatgpt-plan");
++const issuer = "https://auth.openai.com";
++const resource = "https://api.openai.com/v1";
++const hostKey = "credential/chatgpt-plan/host";
++const bootstrapClientId = "dynamic_agent_client";
++const planScopes = [
++  "offline_access",
++  "resource.invoke",
++  "chatgpt.tokens.use.direct",
++];
++const scopes = ["openid", "profile", "email", ...planScopes];
++const timeoutMs = 15_000;
++
++const grantSchema = z.object({
++  access_token: z.string().min(1),
++  refresh_token: z.string().min(1).optional(),
++  id_token: z.string().min(1).optional(),
++  expires_in: z.number().positive(),
++  scope: z.string().optional(),
++  token_type: z.string().refine((value) => value.toLowerCase() === "bearer"),
++});
++
++const registrationSchema = z.object({
++  clientId: z.string().min(1),
++  subject: z.string().min(1),
++  email: z.email().optional(),
++});
++const sessionSchema = registrationSchema.extend({
++  accessToken: z.string().min(1),
++  refreshToken: z.string().min(1),
++  expiresAt: z.number(),
++  scopes: z.array(z.string()),
++});
++type Registration = z.infer<typeof registrationSchema>;
++type Session = z.infer<typeof sessionSchema>;
++
++type PendingSignIn = {
++  state: string;
++  nonce: string;
++  verifier: string;
++  redirect: string;
++  expiresAt: number;
++  previous?: Registration;
++};
++let pending: PendingSignIn | undefined;
++let operation: Promise<unknown> = Promise.resolve();
++
++// The assistant IPC server is the only writer of direct-plan sessions.
++// Sidecar workers ask that server for access tokens, so only one process
++// exchanges each rotating refresh token.
++function serialized<T>(fn: () => Promise<T>): Promise<T> {
++  const next = operation.then(fn);
++  operation = next.catch(() => {});
++  return next;
++}
++
++async function exchange(params: Record<string, string>) {
++  const response = await fetch(`${issuer}/api/accounts/oauth/token`, {
++    method: "POST",
++    body: new URLSearchParams({ ...params, resource }),
++    redirect: "error",
++    signal: AbortSignal.timeout(timeoutMs),
++  });
++  if (!response.ok) {
++    throw new Error(`ChatGPT token exchange returned HTTP ${response.status}.`);
++  }
++  const result = grantSchema.safeParse(await response.json());
++  if (!result.success) {
++    throw new Error("ChatGPT token exchange returned an incomplete grant.");
++  }
++  return result.data;
++}
++
++async function readSecureValue(key: string) {
++  const result = await getSecureKeyResultAsync(key);
++  if (result.unreachable) {
++    throw new Error("The credential store is temporarily unavailable.");
++  }
++  return result.value;
++}
++
++async function readRecord<T>(
++  key: string,
++  schema: z.ZodType<T>,
++): Promise<T | undefined> {
++  const raw = await readSecureValue(key);
++  return raw ? schema.parse(JSON.parse(raw)) : undefined;
++}
++
++async function saveSession(key: string, session: Session): Promise<void> {
++  if (!(await setSecureKeyAsync(key, JSON.stringify(session)))) {
++    throw new Error(
++      "Could not save the ChatGPT session to the credential store.",
++    );
++  }
++}
++
++function currentConnection() {
++  const db = getDb();
++  return getConnection(db, CHATGPT_SUBSCRIPTION_CONNECTION_NAME);
++}
++
++export function beginChatgptPlanSignIn(port: number, newAccount: boolean) {
++  return serialized(async () => {
++    let host = await readSecureValue(hostKey);
++    if (!host) {
++      host = `urn:uuid:${randomUUID()}`;
++      if (!(await setSecureKeyAsync(hostKey, host))) {
++        throw new Error(
++          "Could not save the ChatGPT host ID to the credential store.",
++        );
++      }
++    }
++    const auth = currentConnection()?.auth;
++    const previous =
++      !newAccount &&
++      auth?.type === "oauth_subscription" &&
++      isChatgptPlanCredential(auth.credential)
++        ? await readRecord(
++            `${auth.credential}/registration`,
++            registrationSchema,
++          )
++        : undefined;
++    const state = randomBytes(32).toString("base64url");
++    const nonce = randomBytes(32).toString("base64url");
++    const verifier = randomBytes(32).toString("base64url");
++    const redirect = `http://127.0.0.1:${port}/auth/callback`;
++
++    pending = {
++      state,
++      nonce,
++      verifier,
++      redirect,
++      expiresAt: Date.now() + 600_000,
++      previous,
++    };
++
++    const url = new URL("/api/accounts/authorize", issuer);
++    url.search = new URLSearchParams({
++      client_id: previous?.clientId ?? bootstrapClientId,
++      ...(!previous ? { agent_name_hint: "Vellum AIO" } : {}),
++      ext_agent_host_id: host,
++      response_type: "code",
++      redirect_uri: redirect,
++      resource,
++      scope: scopes.join(" "),
++      state,
++      nonce,
++      code_challenge_method: "S256",
++      code_challenge: createHash("sha256").update(verifier).digest("base64url"),
++    }).toString();
++    return { url: url.href };
++  });
++}
++
++interface ModelEntry {
++  id: string;
++  displayName: string;
++}
++
++const modelResponseSchema = z.object({
++  models: z.array(
++    z.object({
++      slug: z.string(),
++      display_name: z.string().nullish(),
++      visibility: z.string(),
++    }),
++  ),
++});
++
++async function fetchModels(accessToken: string): Promise<ModelEntry[]> {
++  const response = await fetch(`${resource}/models`, {
++    headers: { Authorization: `Bearer ${accessToken}` },
++    redirect: "error",
++    signal: AbortSignal.timeout(timeoutMs),
++  });
++  if (!response.ok) {
++    throw new Error(
++      `ChatGPT model discovery returned HTTP ${response.status}.`,
++    );
++  }
++  const result = modelResponseSchema.safeParse(await response.json());
++  if (!result.success) {
++    throw new Error("ChatGPT model discovery returned an invalid catalog.");
++  }
++  const models = new Map<string, ModelEntry>();
++  for (const item of result.data.models) {
++    if (
++      item.visibility === "list" &&
++      chatgptModelSlug.test(item.slug) &&
++      !models.has(item.slug)
++    ) {
++      models.set(item.slug, {
++        id: item.slug,
++        displayName: item.display_name?.trim().slice(0, 200) || item.slug,
++      });
++    }
++  }
++  return [...models.values()];
++}
++
++function scopesForGrant(
++  scope: string | undefined,
++  previous: string[] = [],
++): string[] {
++  const granted = scope === undefined ? previous : scope.trim().split(/\s+/);
++  if (!planScopes.every((value) => granted.includes(value))) {
++    throw new Error("ChatGPT plan permission was not granted.");
++  }
++  return granted;
++}
++
++const idTokenHeader = z.object({
++  alg: z.literal("RS256"),
++  kid: z.string().min(1),
++});
++const idTokenPayload = z.object({
++  iss: z.literal(issuer),
++  aud: z.union([z.string(), z.array(z.string())]),
++  azp: z.string().optional(),
++  exp: z.number().int(),
++  nbf: z.number().int().optional(),
++  nonce: z.string(),
++  sub: z.string().min(1),
++  email: z.email().optional(),
++});
++const publicKeys = z.object({
++  keys: z.array(
++    z.object({
++      kid: z.string(),
++      kty: z.string(),
++      e: z.string().optional(),
++      n: z.string().optional(),
++      use: z.string().optional(),
++      alg: z.string().optional(),
++    }),
++  ),
++});
++
++async function verifyIdentity(token: string, clientId: string, nonce: string) {
++  try {
++    const parts = token.split(".");
++    if (
++      parts.length !== 3 ||
++      parts.some((part) => !/^[A-Za-z0-9_-]+$/.test(part))
++    ) {
++      throw new Error();
++    }
++    const [header, payload, signature] = parts;
++    const claims = idTokenPayload.parse(
++      JSON.parse(Buffer.from(payload, "base64url").toString()),
++    );
++    const { kid } = idTokenHeader.parse(
++      JSON.parse(Buffer.from(header, "base64url").toString()),
++    );
++    const response = await fetch(`${issuer}/.well-known/jwks.json`, {
++      redirect: "error",
++      signal: AbortSignal.timeout(timeoutMs),
++    });
++    if (!response.ok) {
++      throw new Error();
++    }
++    const { keys } = publicKeys.parse(await response.json());
++    const key = keys.find(
++      (entry) =>
++        entry.kid === kid &&
++        entry.kty === "RSA" &&
++        (entry.use === undefined || entry.use === "sig") &&
++        (entry.alg === undefined || entry.alg === "RS256"),
++    );
++    const audience = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
++    const now = Math.floor(Date.now() / 1000);
++    if (
++      !key?.n ||
++      !key.e ||
++      !verify(
++        "RSA-SHA256",
++        Buffer.from(`${header}.${payload}`),
++        createPublicKey({ key, format: "jwk" }),
++        Buffer.from(signature, "base64url"),
++      ) ||
++      !audience.includes(clientId) ||
++      ((audience.length > 1 || claims.azp !== undefined) &&
++        claims.azp !== clientId) ||
++      claims.nonce !== nonce ||
++      claims.exp <= now ||
++      (claims.nbf !== undefined && claims.nbf > now)
++    ) {
++      throw new Error();
++    }
++    return { subject: claims.sub, email: claims.email };
++  } catch {
++    throw new Error("Could not verify the ChatGPT ID token.");
++  }
++}
++
++export function finishChatgptPlanSignIn(callbackUrl: string) {
++  return serialized(async () => {
++    const attempt = pending;
++    const callback = new URL(callbackUrl);
++    const query = callback.searchParams;
++    if (
++      !attempt ||
++      Date.now() >= attempt.expiresAt ||
++      callback.origin + callback.pathname !== attempt.redirect ||
++      query.get("state") !== attempt.state
++    ) {
++      throw new Error(
++        "The ChatGPT sign-in callback did not match the pending attempt.",
++      );
++    }
++    pending = undefined;
++    if (query.has("error")) {
++      throw new Error("ChatGPT sign-in was declined.");
++    }
++    const clientId = query.get("client_id") ?? attempt.previous?.clientId;
++    const code = query.get("code");
++    if (
++      !clientId ||
++      clientId === bootstrapClientId ||
++      !code ||
++      (attempt.previous && clientId !== attempt.previous.clientId)
++    ) {
++      throw new Error("ChatGPT sign-in returned an invalid code or client ID.");
++    }
++    const grant = await exchange({
++      client_id: clientId,
++      grant_type: "authorization_code",
++      code,
++      code_verifier: attempt.verifier,
++      redirect_uri: attempt.redirect,
++    });
++    if (!grant.id_token || !grant.refresh_token) {
++      throw new Error(
++        "ChatGPT did not return an ID token and renewable session.",
++      );
++    }
++    const { subject, email } = await verifyIdentity(
++      grant.id_token,
++      clientId,
++      attempt.nonce,
++    );
++    if (attempt.previous && attempt.previous.subject !== subject) {
++      throw new Error(
++        "The ChatGPT identity did not match the sign-in attempt.",
++      );
++    }
++    const session: Session = {
++      clientId,
++      subject,
++      accessToken: grant.access_token,
++      refreshToken: grant.refresh_token,
++      expiresAt: Date.now() + grant.expires_in * 1000,
++      scopes: scopesForGrant(grant.scope),
++    };
++    const models = await fetchModels(session.accessToken);
++    if (models.length === 0) {
++      throw new Error(
++        "ChatGPT returned no selectable models for this account.",
++      );
++    }
++    const accountHash = createHash("sha256")
++      .update(JSON.stringify([clientId, subject]))
++      .digest("hex");
++    const credential = `credential/chatgpt-plan/${accountHash}`;
++    if (
++      !(await setSecureKeyAsync(
++        `${credential}/registration`,
++        JSON.stringify({ clientId, subject, email }),
++      ))
++    ) {
++      throw new Error(
++        "Could not save the ChatGPT registration to the credential store.",
++      );
++    }
++    await saveSession(credential, session);
++
++    const db = getDb();
++    const input = {
++      provider: "chatgpt",
++      auth: { type: "oauth_subscription" as const, credential },
++      models,
++    };
++    const name = CHATGPT_SUBSCRIPTION_CONNECTION_NAME;
++    const result = getConnection(db, name)
++      ? updateConnection(db, name, input)
++      : createConnection(db, { ...input, name });
++    if (!result.ok) {
++      throw new Error("Could not update the ChatGPT subscription connection.");
++    }
++    return { models: models.length };
++  });
++}
++
++async function accessTokenFor(credential: string): Promise<string | undefined> {
++  const session = await readRecord(credential, sessionSchema);
++  if (!session) {
++    return undefined;
++  }
++  const remaining = session.expiresAt - Date.now();
++  if (remaining > 120_000) {
++    return session.accessToken;
++  }
++  const grant = await exchange({
++    client_id: session.clientId,
++    grant_type: "refresh_token",
++    refresh_token: session.refreshToken,
++  });
++  const renewed: Session = {
++    ...session,
++    accessToken: grant.access_token,
++    refreshToken: grant.refresh_token ?? session.refreshToken,
++    expiresAt: Date.now() + grant.expires_in * 1000,
++    scopes: scopesForGrant(grant.scope, session.scopes),
++  };
++  await saveSession(credential, renewed);
++  return renewed.accessToken;
++}
++
++export async function getChatgptPlanAccessToken(credential: string) {
++  if (!isChatgptPlanCredential(credential)) {
++    return undefined;
++  }
++  let session = await readRecord(credential, sessionSchema);
++  if (session && session.expiresAt - Date.now() <= 120_000) {
++    // Only the assistant IPC server rotates the session. Respond with a
++    // status and let each authorized caller read the new record from CES.
++    const { cliIpcCall } = await import("../../ipc/cli-client.js");
++    const result = await cliIpcCall("aio_chatgpt_plan_renew", {
++      body: { credential },
++    });
++    if (!result.ok) {
++      throw new Error(result.error ?? "Could not renew ChatGPT plan usage.");
++    }
++    session = await readRecord(credential, sessionSchema);
++  }
++  return session?.accessToken;
++}
++
++export function renewChatgptPlanSession(credential: string) {
++  return serialized(async () => {
++    const current = currentConnection()?.auth;
++    if (
++      current?.type !== "oauth_subscription" ||
++      current.credential !== credential ||
++      !isChatgptPlanCredential(credential)
++    ) {
++      return false;
++    }
++    return Boolean(await accessTokenFor(credential));
++  });
++}
++
++export function refreshChatgptPlanModels(): Promise<{ models: number } | null> {
++  return serialized(async () => {
++    const connection = currentConnection();
++    const auth = connection?.auth;
++    if (
++      auth?.type !== "oauth_subscription" ||
++      !isChatgptPlanCredential(auth.credential)
++    ) {
++      return null;
++    }
++    const accessToken = await accessTokenFor(auth.credential);
++    if (!accessToken) {
++      throw new Error(
++        "Run ChatGPT sign-in to restore the subscription session.",
++      );
++    }
++    const models = await fetchModels(accessToken);
++    const current = currentConnection();
++    if (
++      current?.auth.type !== "oauth_subscription" ||
++      current.auth.credential !== auth.credential
++    ) {
++      return null;
++    }
++    if (JSON.stringify(current.models) !== JSON.stringify(models)) {
++      const result = updateConnection(getDb(), current.name, { auth, models });
++      if (!result.ok) {
++        throw new Error(
++          "Could not refresh the ChatGPT subscription model list.",
++        );
++      }
++    }
++    return { models: models.length };
++  });
++}
++
++export function disconnectChatgptPlan(): Promise<{ revoked: boolean }> {
++  return serialized(async () => {
++    const connection = currentConnection();
++    const auth = connection?.auth;
++    if (
++      auth?.type !== "oauth_subscription" ||
++      !isChatgptPlanCredential(auth.credential)
++    ) {
++      throw new Error("No direct ChatGPT plan session is connected.");
++    }
++    const session = await readRecord(auth.credential, sessionSchema);
++    let revoked = false;
++    if (session) {
++      for (const delay of [0, 750, 1500]) {
++        if (delay) {
++          await Bun.sleep(delay);
++        }
++        try {
++          const response = await fetch(`${issuer}/api/accounts/oauth/revoke`, {
++            method: "POST",
++            body: new URLSearchParams({
++              token: session.refreshToken,
++              token_type_hint: "refresh_token",
++              client_id: session.clientId,
++            }),
++            redirect: "error",
++            signal: AbortSignal.timeout(5_000),
++          });
++          revoked = response.ok;
++          if (response.status < 500) {
++            break;
++          }
++        } catch {
++          // Transient transport failure. Retry while the token is available.
++        }
++      }
++    }
++    const result = await deleteSecureKeyAsync(auth.credential);
++    if (result === "error") {
++      throw new Error(
++        "Could not remove the ChatGPT credentials from the credential store.",
++      );
++    }
++    const current = currentConnection();
++    if (
++      current?.auth.type === "oauth_subscription" &&
++      current.auth.credential === auth.credential
++    ) {
++      updateConnection(getDb(), current.name, { auth, models: [] });
++    }
++    return { revoked };
++  });
++}
++
++let modelTimer: ReturnType<typeof setInterval> | undefined;
++
++export function startChatgptPlanCatalogRefresh() {
++  if (modelTimer) {
++    return;
++  }
++  const refresh = () => {
++    void refreshChatgptPlanModels().catch((err: unknown) => {
++      log.warn(
++        {
++          error: err instanceof Error ? err.message : "catalog refresh failed",
++        },
++        "Could not refresh ChatGPT models",
++      );
++    });
++  };
++  refresh();
++  modelTimer = setInterval(refresh, 15 * 60 * 1000);
++  modelTimer.unref();
++}
+diff --git a/assistant/src/providers/inference/chatgpt-subscription-auth.ts b/assistant/src/providers/inference/chatgpt-subscription-auth.ts
+index fcf784e..a4d2fdf 100644
+--- a/assistant/src/providers/inference/chatgpt-subscription-auth.ts
++++ b/assistant/src/providers/inference/chatgpt-subscription-auth.ts
+@@ -43,7 +43,11 @@ export async function storeChatgptSubscriptionTokens(
+     const updateResult = updateConnection(
+       db,
+       CHATGPT_SUBSCRIPTION_CONNECTION_NAME,
+-      { auth: CHATGPT_SUBSCRIPTION_AUTH_INPUT, provider: "chatgpt" },
++      {
++        auth: CHATGPT_SUBSCRIPTION_AUTH_INPUT,
++        provider: "chatgpt",
++        models: null,
++      },
+     );
+     if (!updateResult.ok) {
+       log.error(
+diff --git a/assistant/src/providers/inference/connection-availability.ts b/assistant/src/providers/inference/connection-availability.ts
+index ce6f312..8ee2b61 100644
+--- a/assistant/src/providers/inference/connection-availability.ts
++++ b/assistant/src/providers/inference/connection-availability.ts
+@@ -124,6 +124,7 @@ function vellumManagedMismatch(
+ export async function computeConnectionAvailability(
+   provider: string,
+   resolvedConnectionName: string,
++  model?: string,
+ ): Promise<ConnectionAvailability> {
+   // Every path loads the row — even the canonical `vellum` name. Boot seeding
+   // (`seedCanonicalConnections`) deliberately leaves a user-owned connection
+@@ -177,6 +178,13 @@ export async function computeConnectionAvailability(
+     };
+   }
+ 
++  if (isChatgptRow && !isConnectionCompatibleWithModel(connection, model)) {
++    return {
++      status: "provider_mismatch",
++      message: `Model "${model}" is unavailable through the connected ChatGPT subscription.`,
++    };
++  }
++
+   switch (connection.auth.type) {
+     case "service_account": {
+       const result = await getSecureKeyResultAsync(connection.auth.credential);
+@@ -195,8 +203,9 @@ export async function computeConnectionAvailability(
+       // Validate the JSON payload before reporting ok: a stored value that is
+       // not a well-formed service-account object will be rejected by dispatch,
+       // so surface the problem here rather than letting a turn fail silently.
+-      const { parseServiceAccountKey } =
+-        await import("./service-account-token.js");
++      const { parseServiceAccountKey } = await import(
++        "./service-account-token.js"
++      );
+       if (!parseServiceAccountKey(result.value)) {
+         return {
+           status: "missing_credential",
+@@ -342,6 +351,7 @@ export async function computeProfileAvailability(
+       return await computeConnectionAvailability(
+         identity.expectedProvider,
+         identity.connectionName,
++        model,
+       );
+     } catch (err) {
+       return {
+diff --git a/assistant/src/providers/inference/resolve-auth.ts b/assistant/src/providers/inference/resolve-auth.ts
+index 7d5c72d..13021e1 100644
+--- a/assistant/src/providers/inference/resolve-auth.ts
++++ b/assistant/src/providers/inference/resolve-auth.ts
+@@ -21,6 +21,8 @@ import {
+   type ResolvedAuth,
+ } from "./auth.js";
+ 
++import { isChatgptPlanCredential } from "../openai/chatgpt-plan-identifiers.js";
++
+ const log = getLogger("resolve-auth");
+ 
+ export type ResolveAuthError =
+@@ -95,13 +97,39 @@ export async function resolveAuth(
+       };
+ 
+     case "oauth_subscription": {
++      if (isChatgptPlanCredential(auth.credential)) {
++        if (provider !== "openai") {
++          return {
++            ok: false,
++            error: { code: "not_implemented", authType: auth.type },
++          };
++        }
++        const { getChatgptPlanAccessToken } = await import("./chatgpt-plan.js");
++        const token = await getChatgptPlanAccessToken(auth.credential);
++        return token
++          ? {
++              ok: true,
++              resolved: {
++                kind: "header",
++                headers: { Authorization: `Bearer ${token}` },
++              },
++            }
++          : {
++              ok: false,
++              error: {
++                code: "credential_not_found",
++                credential: auth.credential,
++              },
++            };
++      }
+       // Extract the credential prefix from the credential key.
+       // The credential field stores "credential/openai-codex/access_token";
+       // we need the prefix "credential/openai-codex" for the refresh logic.
+       const credentialPrefix = auth.credential.replace(/\/access_token$/, "");
+ 
+-      const { getValidCodexAccessToken } =
+-        await import("./codex-token-refresh.js");
++      const { getValidCodexAccessToken } = await import(
++        "./codex-token-refresh.js"
++      );
+       const token = await getValidCodexAccessToken(credentialPrefix);
+ 
+       if (!token) {
+@@ -120,8 +148,9 @@ export async function resolveAuth(
+     }
+ 
+     case "service_account": {
+-      const { getValidServiceAccountToken } =
+-        await import("./service-account-token.js");
++      const { getValidServiceAccountToken } = await import(
++        "./service-account-token.js"
++      );
+       const result = await getValidServiceAccountToken(auth.credential);
+       if (!result.ok) {
+         if (result.reason === "exchange_failed") {
+diff --git a/assistant/src/providers/openai/chatgpt-plan-identifiers.ts b/assistant/src/providers/openai/chatgpt-plan-identifiers.ts
+new file mode 100644
+index 0000000..1f8525b
+--- /dev/null
++++ b/assistant/src/providers/openai/chatgpt-plan-identifiers.ts
+@@ -0,0 +1,6 @@
++/** Account-advertised model IDs are persisted in config independently of sign-in. */
++export const chatgptModelSlug = /^[a-zA-Z0-9][a-zA-Z0-9_.:/-]{0,199}$/;
++
++export function isChatgptPlanCredential(credential: string): boolean {
++  return /^credential\/chatgpt-plan\/[a-f0-9]{64}$/.test(credential);
++}
+diff --git a/assistant/src/providers/openai/responses-provider.ts b/assistant/src/providers/openai/responses-provider.ts
+index b400230..04173c9 100644
+--- a/assistant/src/providers/openai/responses-provider.ts
++++ b/assistant/src/providers/openai/responses-provider.ts
+@@ -49,6 +49,7 @@ export interface OpenAIResponsesProviderOptions {
+   /** When true, target the Codex subscription endpoint and strip fields it
+    *  rejects (`max_output_tokens`, `prompt_cache_options`, breakpoints). */
+   codexSubscription?: boolean;
++  chatgptPlan?: boolean;
+   /** Static HTTP headers sent with every request (e.g. OpenRouter app
+    *  attribution). Merged under any per-request attribution headers. */
+   requestHeaders?: Record<string, string>;
+@@ -175,9 +176,11 @@ interface ResponsesStreamEvent {
+   name?: string;
+   item?: { type?: string; id?: string; call_id?: string; name?: string };
+   item_id?: string;
++  code?: string;
+   response?: {
+     model?: string;
+     status?: string;
++    error?: { code?: string };
+     incomplete_details?: {
+       reason?: "max_output_tokens" | "content_filter";
+     } | null;
+@@ -238,6 +241,7 @@ export class OpenAIResponsesProvider implements Provider {
+   private streamTimeoutMs: number;
+   private useNativeWebSearch: boolean;
+   private codexSubscription: boolean;
++  private readonly chatgptPlan: boolean;
+   private readonly requestHeaders: Record<string, string>;
+ 
+   constructor(
+@@ -248,6 +252,7 @@ export class OpenAIResponsesProvider implements Provider {
+     this.name = options.providerName ?? "openai";
+     this.providerLabel = options.providerLabel ?? "OpenAI";
+     this.codexSubscription = options.codexSubscription ?? false;
++    this.chatgptPlan = options.chatgptPlan ?? false;
+     this.requestHeaders = options.requestHeaders ?? {};
+     this.streamTimeoutMs = options.streamTimeoutMs ?? 1_800_000;
+     // Keep the SDK deadline behind our provider stream timeout so
+@@ -257,8 +262,11 @@ export class OpenAIResponsesProvider implements Provider {
+       apiKey,
+       baseURL: this.codexSubscription
+         ? "https://chatgpt.com/backend-api/codex"
+-        : options.baseURL,
++        : this.chatgptPlan
++          ? "https://api.openai.com/v1"
++          : options.baseURL,
+       timeout: sdkTimeoutMs,
++      ...(this.chatgptPlan ? { maxRetries: 0 } : {}),
+       // Capture the raw non-2xx body before the SDK parses (and drops) it.
+       fetch: captureRawErrorBodyFetch,
+     });
+@@ -300,11 +308,12 @@ export class OpenAIResponsesProvider implements Provider {
+       const effectiveModel = modelOverride ?? this.model;
+       recordProviderRequestDiagnostics({ model_id: effectiveModel });
+       const input = await this.toResponsesInput(messages);
++      const subscription = this.codexSubscription || this.chatgptPlan;
+ 
+       const params: Record<string, unknown> = {
+         model: effectiveModel,
+         input,
+-        ...(this.codexSubscription ? { store: false } : {}),
++        ...(subscription ? { store: false } : {}),
+       };
+ 
+       if (systemPrompt) {
+@@ -322,7 +331,7 @@ export class OpenAIResponsesProvider implements Provider {
+       // breakpoint-capable models (which additionally opt into explicit mode
+       // below) and implicit-mode models, which carry no explicit breakpoints,
+       // still gain prefix-cache routing affinity from a stable key.
+-      if (promptCacheKey) {
++      if (promptCacheKey && !this.chatgptPlan) {
+         params.prompt_cache_key = promptCacheKey;
+       }
+ 
+@@ -340,7 +349,7 @@ export class OpenAIResponsesProvider implements Provider {
+       // stay off there. Codex runs in implicit prefix-cache mode and relies
+       // on `prompt_cache_key` above for routing affinity.
+       if (
+-        !this.codexSubscription &&
++        !subscription &&
+         PROMPT_CACHE_BREAKPOINT_MODEL_IDS.has(effectiveModel)
+       ) {
+         params.prompt_cache_options = { mode: "explicit" };
+@@ -349,14 +358,17 @@ export class OpenAIResponsesProvider implements Provider {
+         }
+       }
+ 
+-      if (maxTokens && !this.codexSubscription) {
++      if (maxTokens && !subscription) {
+         params.max_output_tokens = maxTokens;
+       }
+ 
+       const reasoningEffort = effort
+         ? mapResponsesReasoningEffort(effort, effectiveModel)
+         : undefined;
+-      if (reasoningEffort) {
++      if (
++        reasoningEffort &&
++        (!this.chatgptPlan || OPENAI_EFFORT_CEILINGS.has(effectiveModel))
++      ) {
+         // Request a human-readable reasoning summary whenever the model will
+         // reason — without it the Responses API emits no visible thinking at
+         // all. "auto" resolves to the richest level the model supports
+@@ -367,12 +379,13 @@ export class OpenAIResponsesProvider implements Provider {
+         // forces `store: false` and rejects `max_output_tokens`), so its
+         // wire shape is left untouched.
+         params.reasoning =
+-          reasoningEffort === "none" || this.codexSubscription
++          reasoningEffort === "none" || subscription
+             ? { effort: reasoningEffort }
+             : { effort: reasoningEffort, summary: "auto" };
+       }
+ 
+       if (
++        !this.chatgptPlan &&
+         verbosity &&
+         VALID_VERBOSITIES.has(verbosity) &&
+         modelSupportsVerbosity(modelOverride ?? this.model)
+@@ -390,7 +403,44 @@ export class OpenAIResponsesProvider implements Provider {
+       // compatible connections, which use the chat-completions client, honor
+       // `top_p` normally.
+ 
+-      if (tools && tools.length > 0) {
++      if (this.chatgptPlan && tools && tools.length > 0) {
++        const nativeSearch =
++          this.useNativeWebSearch &&
++          tools.some((tool) => tool.name === "web_search");
++        const functions = tools.filter(
++          (tool) => !nativeSearch || tool.name !== "web_search",
++        );
++        params.tools = [
++          ...(functions.length > 0
++            ? [
++                {
++                  type: "namespace",
++                  name: "vellum",
++                  description: "Tools available to the Vellum assistant.",
++                  tools: functions.map((tool) => ({
++                    type: "function",
++                    name: tool.name,
++                    description: tool.description,
++                    parameters: tool.input_schema,
++                    strict: null,
++                  })),
++                },
++              ]
++            : []),
++          ...(nativeSearch
++            ? [{ type: "web_search", external_web_access: false }]
++            : []),
++        ];
++        const choice = mapNeutralToolChoiceForResponses(configObj?.tool_choice);
++        if (choice !== undefined) {
++          params.tool_choice =
++            typeof choice === "object"
++              ? nativeSearch && choice.name === "web_search"
++                ? { type: "web_search" }
++                : { ...choice, namespace: "vellum" }
++              : choice;
++        }
++      } else if (tools && tools.length > 0) {
+         if (
+           this.useNativeWebSearch &&
+           tools.some((t) => t.name === "web_search")
+@@ -585,6 +635,16 @@ export class OpenAIResponsesProvider implements Provider {
+               break;
+             }
+ 
++            case "error":
++            case "response.failed": {
++              if (this.chatgptPlan) {
++                const code =
++                  event.response?.error?.code ?? event.code ?? "unknown_error";
++                throw new Error(`ChatGPT plan inference failed (${code}).`);
++              }
++              break;
++            }
++
+             case "response.completed":
+             case "response.incomplete": {
+               const response = event.response;
+@@ -629,6 +689,12 @@ export class OpenAIResponsesProvider implements Provider {
+         cleanupTimeout();
+       }
+ 
++      if (this.chatgptPlan && !rawFinalResponse) {
++        throw new Error(
++          "ChatGPT plan inference ended without a terminal response.",
++        );
++      }
++
+       // Build content blocks.
+       // Inject server_tool_use + web_search_tool_result pairs before text so
+       // conversation history matches the shape Anthropic produces for native
+@@ -995,6 +1061,7 @@ export class OpenAIResponsesProvider implements Provider {
+             type: "function_call",
+             call_id: block.id,
+             name: block.name,
++            ...(this.chatgptPlan ? { namespace: "vellum" } : {}),
+             arguments: JSON.stringify(block.input),
+           });
+           emittedCallIds.add(block.id);
+diff --git a/assistant/src/providers/registry.ts b/assistant/src/providers/registry.ts
+index a225382..52a21b9 100644
+--- a/assistant/src/providers/registry.ts
++++ b/assistant/src/providers/registry.ts
+@@ -73,7 +73,12 @@ function getConnectionProviderCacheKey(
+   // `effectiveProvider` differs from `connection.provider` only for the
+   // provider-agnostic Vellum-managed connection, where one connection name
+   // serves multiple upstreams — include it so those entries don't collide.
+-  return `${connection.name}\u0000${effectiveProvider}\u0000${model}`;
++  return JSON.stringify([
++    connection.name,
++    effectiveProvider,
++    model,
++    connection.auth,
++  ]);
+ }
+ 
+ function registerProvider(name: string, provider: Provider): void {
+diff --git a/assistant/src/providers/routing-identity.ts b/assistant/src/providers/routing-identity.ts
+index 0ac468b..20100de 100644
+--- a/assistant/src/providers/routing-identity.ts
++++ b/assistant/src/providers/routing-identity.ts
+@@ -11,7 +11,7 @@
+ 
+ import { ConfigError } from "../util/errors.js";
+ import { CHATGPT_SUBSCRIPTION_CONNECTION_NAME } from "./inference/auth.js";
+-import { isCodexSubscriptionModel } from "./openai/codex-models.js";
++import { chatgptModelSlug } from "./openai/chatgpt-plan-identifiers.js";
+ import {
+   getManagedUpstream,
+   VELLUM_MANAGED_CONNECTION_NAME,
+@@ -58,7 +58,7 @@ export class ConnectionResolutionError extends ConfigError {
+  * chatgpt-subscription connection with an openai upstream. Returns null for
+  * real providers. Throws `unroutable_managed_model` when a vellum model has
+  * no managed upstream, and `model_incompatible` when a chatgpt model is
+- * outside the Codex subscription set — loud and explainable, never a soft
++ * not a valid provider slug — loud and explainable, never a soft
+  * fall-through to the (possibly platform-billed) default transport.
+  */
+ export function resolveRoutingIdentity(
+@@ -81,14 +81,12 @@ export function resolveRoutingIdentity(
+     };
+   }
+   if (provider === "chatgpt") {
+-    // The subscription endpoint rejects non-Codex models with HTTP 400;
+-    // gate here so the misconfiguration surfaces as a config error instead
+-    // of an upstream request failure.
+-    if (model && !isCodexSubscriptionModel(model)) {
++    // The authenticated connection supplies the actual compatibility list.
++    if (model && !chatgptModelSlug.test(model)) {
+       throw new ConnectionResolutionError(
+         CHATGPT_SUBSCRIPTION_CONNECTION_NAME,
+         "model_incompatible",
+-        `provider "chatgpt" cannot route model "${model}" — the ChatGPT subscription serves Codex models only. Pick a Codex model or set a concrete provider.`,
++        `provider "chatgpt" cannot route model "${model}" — expected a ChatGPT model ID.`,
+         { model },
+       );
+     }
+diff --git a/assistant/src/runtime/routes/conversation-query-routes.ts b/assistant/src/runtime/routes/conversation-query-routes.ts
+index c66e9eb..d525cf9 100644
+--- a/assistant/src/runtime/routes/conversation-query-routes.ts
++++ b/assistant/src/runtime/routes/conversation-query-routes.ts
+@@ -120,8 +120,12 @@ import { type LogRow } from "../../persistence/llm-request-log-store.js";
+ import { getMemoryRecallLogByMessageIds } from "../../plugins/defaults/memory/memory-recall-log-store.js";
+ import { getMemoryV2ActivationLogByMessageIds } from "../../plugins/defaults/memory/v2/activation-log-store.js";
+ import { getMemoryV3SelectionForInspectorByMessageIds } from "../../plugins/defaults/memory/v3/selection-log-store.js";
++import { chatgptModelAvailabilityIssue } from "../../providers/connection-model-compat.js";
+ import { writableProfileProviderIssue } from "../../providers/connection-resolution.js";
+-import { ROUTING_IDENTITY_PROVIDERS } from "../../providers/inference/auth.js";
++import {
++  CHATGPT_SUBSCRIPTION_CONNECTION_NAME,
++  ROUTING_IDENTITY_PROVIDERS,
++} from "../../providers/inference/auth.js";
+ import { PROVIDERS_REQUIRING_BASE_URL_AND_MODELS } from "../../providers/inference/auth.js";
+ import {
+   createConnection,
+@@ -1480,11 +1484,7 @@ function assertRoutableIdentityEntries(
+   raw: Record<string, unknown>,
+ ): void {
+   const entries = collectProviderEntries(raw);
+-  const priorProviders = new Map(
+-    collectProviderEntries(preWrite).flatMap(([label, entry]) =>
+-      typeof entry.provider === "string" ? [[label, entry.provider]] : [],
+-    ),
+-  );
++  const priorEntries = new Map(collectProviderEntries(preWrite));
+   for (const [label, entry] of entries) {
+     if (typeof entry.provider !== "string") {
+       continue;
+@@ -1498,7 +1498,7 @@ function assertRoutableIdentityEntries(
+     // fail with no in-product repair path. Profiles accept entry names;
+     // call-site fragments and the legacy default blob stay vendor-only
+     // (overrides become model-only with the entries demolition).
+-    if (entry.provider !== priorProviders.get(label)) {
++    if (entry.provider !== priorEntries.get(label)?.provider) {
+       const providerIssue = label.startsWith("llm.profiles.")
+         ? writableProfileProviderIssue(entry.provider)
+         : unknownLlmProviderIssue(entry.provider);
+@@ -1513,6 +1513,20 @@ function assertRoutableIdentityEntries(
+     if (issue) {
+       throw new BadRequestError(`${issue} (${label})`);
+     }
++    const prior = priorEntries.get(label);
++    if (
++      entry.provider === "chatgpt" &&
++      typeof entry.model === "string" &&
++      (prior?.provider !== entry.provider || prior.model !== entry.model)
++    ) {
++      const availabilityIssue = chatgptModelAvailabilityIssue(
++        getConnection(getDb(), CHATGPT_SUBSCRIPTION_CONNECTION_NAME),
++        entry.model,
++      );
++      if (availabilityIssue) {
++        throw new BadRequestError(`${availabilityIssue} (${label})`);
++      }
++    }
+   }
+ }
+ 
+diff --git a/assistant/src/runtime/routes/inference-profiles-routes.ts b/assistant/src/runtime/routes/inference-profiles-routes.ts
+index 2f0316c..dec4c58 100644
+--- a/assistant/src/runtime/routes/inference-profiles-routes.ts
++++ b/assistant/src/runtime/routes/inference-profiles-routes.ts
+@@ -38,6 +38,8 @@ import {
+   ProfileEntry,
+   routingIdentityModelIssue,
+ } from "../../config/schemas/llm.js";
++import { chatgptModelAvailabilityIssue } from "../../providers/connection-model-compat.js";
++import { CHATGPT_SUBSCRIPTION_CONNECTION_NAME } from "../../providers/inference/auth.js";
+ import { getDb } from "../../persistence/db-connection.js";
+ import {
+   catalogProviderForProfile,
+@@ -208,7 +210,13 @@ function modelReachIssue(
+   connectionName?: string,
+ ): { identity: boolean; catalogProvider: string; message: string } | null {
+   if (ROUTING_IDENTITY_PROVIDERS.has(provider)) {
+-    const issue = routingIdentityModelIssue(provider, model);
++    let issue = routingIdentityModelIssue(provider, model);
++    if (!issue && provider === "chatgpt") {
++      issue = chatgptModelAvailabilityIssue(
++        getConnection(getDb(), CHATGPT_SUBSCRIPTION_CONNECTION_NAME),
++        model,
++      );
++    }
+     return issue
+       ? { identity: true, catalogProvider: provider, message: issue }
+       : null;
+diff --git a/assistant/src/runtime/routes/inference-provider-connection-routes.ts b/assistant/src/runtime/routes/inference-provider-connection-routes.ts
+index 182e81b..a1ba093 100644
+--- a/assistant/src/runtime/routes/inference-provider-connection-routes.ts
++++ b/assistant/src/runtime/routes/inference-provider-connection-routes.ts
+@@ -45,6 +45,7 @@ import {
+   EndpointCheckSchema,
+   testInferenceConnection,
+ } from "../../providers/inference/endpoint-probe.js";
++import { isChatgptPlanCredential } from "../../providers/openai/chatgpt-plan-identifiers.js";
+ import { PROVIDER_CATALOG } from "../../providers/model-catalog.js";
+ import {
+   isVellumManagedConnection,
+@@ -560,6 +561,11 @@ async function handleUpdateConnection({
+   const result = updateConnection(getDb(), name, {
+     auth: authResult.data,
+     ...(chatgptIdentityStamp ? { provider: "chatgpt" } : {}),
++    ...(existing.auth.type === "oauth_subscription" &&
++    isChatgptPlanCredential(existing.auth.credential) &&
++    authFingerprint(authResult.data) !== authFingerprint(existing.auth)
++      ? { models: null }
++      : {}),
+     ...(labelRaw !== undefined ? { label: labelRaw as string | null } : {}),
+     ...customFields,
+   });
+@@ -600,6 +606,16 @@ async function handleDeleteConnection({ pathParams = {} }: RouteHandlerArgs) {
+     throw new NotFoundError(`Connection "${name}" not found.`);
+   }
+ 
++  if (
++    existing.auth.type === "oauth_subscription" &&
++    isChatgptPlanCredential(existing.auth.credential) &&
++    existing.models?.length
++  ) {
++    throw new BadRequestError(
++      "Run vellum-aio chatgpt disconnect before deleting this connection.",
++    );
++  }
++
+   // Managed connections are write-protected: `seedCanonicalConnections` would
+   // re-upsert them on the next daemon boot anyway, so a successful delete here
+   // produces a confusing delete → reappear loop. Reject outright. Mirrors
+diff --git a/clients/web/src/domains/settings/ai/call-site-overrides-row.tsx b/clients/web/src/domains/settings/ai/call-site-overrides-row.tsx
+index 2619141..393c75b 100644
+--- a/clients/web/src/domains/settings/ai/call-site-overrides-row.tsx
++++ b/clients/web/src/domains/settings/ai/call-site-overrides-row.tsx
+@@ -29,6 +29,7 @@ import {
+ } from "@/domains/settings/ai/call-site-helpers";
+ import {
+   codexServableModels,
++  getChatgptAccountModels,
+   restrictsToSubscriptionModels,
+ } from "@/domains/settings/ai/codex-subscription-models";
+ import {
+@@ -47,7 +48,8 @@ interface ProfileOption {
+ }
+ 
+ type PickableProvider =
+-  (typeof INFERENCE_PROVIDERS)[number] | typeof CHATGPT_CONNECTION_PROVIDER;
++  | (typeof INFERENCE_PROVIDERS)[number]
++  | typeof CHATGPT_CONNECTION_PROVIDER;
+ 
+ export interface CallSiteOverrideRowProps {
+   id: string;
+@@ -148,13 +150,15 @@ export function CallSiteOverrideRow({
+   const connectionsForProvider = (connections ?? []).filter((c) =>
+     connectionServesProvider(c.provider, currentProvider),
+   );
+-  const availableModels = restrictsToSubscriptionModels(
+-    currentProvider,
+-    "",
+-    connectionsForProvider,
+-  )
+-    ? codexServableModels(currentProvider)
+-    : getVisibleModelsForProvider(currentProvider, catalogFlags);
++  const accountModels =
++    currentProvider === CHATGPT_CONNECTION_PROVIDER
++      ? getChatgptAccountModels(connectionsForProvider)
++      : undefined;
++  const availableModels =
++    accountModels ??
++    (restrictsToSubscriptionModels(currentProvider, "", connectionsForProvider)
++      ? codexServableModels(currentProvider)
++      : getVisibleModelsForProvider(currentProvider, catalogFlags));
+   const modelOptions = availableModels.map((m) => ({
+     value: m.id,
+     label: m.displayName,
+diff --git a/clients/web/src/domains/settings/ai/codex-subscription-models.ts b/clients/web/src/domains/settings/ai/codex-subscription-models.ts
+index c49b321..90ea6ca 100644
+--- a/clients/web/src/domains/settings/ai/codex-subscription-models.ts
++++ b/clients/web/src/domains/settings/ai/codex-subscription-models.ts
+@@ -9,6 +9,25 @@ import type {
+ 
+ export { CODEX_SUBSCRIPTION_MODEL_IDS };
+ 
++/** The account catalog is present only on a direct ChatGPT plan connection. */
++export function getChatgptAccountModels(
++  connections: readonly ProviderConnection[],
++) {
++  const models = connections.find(
++    (connection) =>
++      connection.name === "chatgpt-subscription" &&
++      connection.provider === "chatgpt" &&
++      connection.auth.type === "oauth_subscription" &&
++      /^credential\/chatgpt-plan\/[a-f0-9]{64}$/.test(
++        connection.auth.credential,
++      ),
++  )?.models;
++  return models?.map((model) => ({
++    id: model.id,
++    displayName: model.displayName ?? model.id,
++  }));
++}
++
+ /** The provider's catalog models a ChatGPT subscription can dispatch. */
+ export function codexServableModels(
+   provider: ConnectionProvider,
+diff --git a/clients/web/src/domains/settings/ai/model-first-candidates.test.ts b/clients/web/src/domains/settings/ai/model-first-candidates.test.ts
+index a3bb3fa..c1dbe95 100644
+--- a/clients/web/src/domains/settings/ai/model-first-candidates.test.ts
++++ b/clients/web/src/domains/settings/ai/model-first-candidates.test.ts
+@@ -67,6 +67,28 @@ const VELLUM_CONNECTION = connection("vellum", "vellum", {
+ });
+ 
+ describe("resolveModelFirstOptions", () => {
++  test("offers newly discovered ChatGPT models from the account connection", () => {
++    const connections = [
++      connection("chatgpt-subscription", "chatgpt", {
++        auth: {
++          type: "oauth_subscription",
++          credential: `credential/chatgpt-plan/${"a".repeat(64)}`,
++        },
++        models: [{ id: "gpt-future-model", displayName: "GPT Future" }],
++      }),
++    ];
++    expect(optionFor(connections, "GPT Future").candidates).toEqual([
++      expect.objectContaining({
++        provider: "chatgpt",
++        modelId: "gpt-future-model",
++        connected: true,
++      }),
++    ]);
++    expect(
++      providersOf(optionFor(connections, "GPT-6.1 Sol").candidates),
++    ).not.toContain("chatgpt");
++  });
++
+   test("lists each model once across the providers that host it", () => {
+     const options = resolveModelFirstOptions(input([]));
+     const opus = options.filter(
+diff --git a/clients/web/src/domains/settings/ai/model-first-candidates.ts b/clients/web/src/domains/settings/ai/model-first-candidates.ts
+index 6e27f67..3a19cb6 100644
+--- a/clients/web/src/domains/settings/ai/model-first-candidates.ts
++++ b/clients/web/src/domains/settings/ai/model-first-candidates.ts
+@@ -39,6 +39,7 @@ import {
+   providersServedByConnections,
+   unconnectedProviders,
+ } from "@/domains/settings/ai/provider-availability";
++import { getChatgptAccountModels } from "@/domains/settings/ai/codex-subscription-models";
+ import { connectionAuthTypeForProvider } from "@/domains/settings/ai/provider-editor-constants";
+ import type {
+   ConnectionProvider,
+@@ -292,12 +293,18 @@ export function resolveModelFirstOptions(
+       continue;
+     }
+ 
+-    const models = getTextGenerationModelsForProvider(
+-      kind,
+-      catalogEnabledFlags({
+-        hostedInference: input.hostedInference,
+-      }),
+-    );
++    const accountModels =
++      kind === CHATGPT_CONNECTION_PROVIDER
++        ? getChatgptAccountModels(input.connections)
++        : undefined;
++    const models =
++      accountModels ??
++      getTextGenerationModelsForProvider(
++        kind,
++        catalogEnabledFlags({
++          hostedInference: input.hostedInference,
++        }),
++      );
+     if (models.length === 0) {
+       continue;
+     }
+diff --git a/clients/web/src/domains/settings/ai/profile-editor-provider-section.tsx b/clients/web/src/domains/settings/ai/profile-editor-provider-section.tsx
+index a6b004b..5866b93 100644
+--- a/clients/web/src/domains/settings/ai/profile-editor-provider-section.tsx
++++ b/clients/web/src/domains/settings/ai/profile-editor-provider-section.tsx
+@@ -18,6 +18,7 @@ import { useAssistantFeatureFlagStore } from "@/stores/assistant-feature-flag-st
+ 
+ import {
+   codexServableModels,
++  getChatgptAccountModels,
+   restrictsToSubscriptionModels,
+ } from "@/domains/settings/ai/codex-subscription-models";
+ import {
+@@ -181,9 +182,7 @@ export function ProfileEditorProviderSection({
+   // `connections === []` is distinct: zero connections confirmed, so the
+   // filter runs and yields empty — the empty-state hint fires.
+   const providerOptionsSource =
+-    connections === undefined
+-      ? CATALOG_PROVIDERS
+-      : visibleProviders;
++    connections === undefined ? CATALOG_PROVIDERS : visibleProviders;
+ 
+   // A confirmed-empty connection list. Read-only profiles cannot act on it,
+   // so they are not told to.
+@@ -215,10 +214,15 @@ export function ProfileEditorProviderSection({
+       if (!provider) {
+         return [];
+       }
+-      const catalogModels = getVisibleModelsForProvider(
+-        provider,
+-        catalogFlags,
+-      );
++      if (provider === CHATGPT_CONNECTION_PROVIDER) {
++        const accountModels = getChatgptAccountModels(
++          availableConnectionsForProvider,
++        );
++        if (accountModels) {
++          return accountModels;
++        }
++      }
++      const catalogModels = getVisibleModelsForProvider(provider, catalogFlags);
+       if (catalogModels.length > 0) {
+         if (
+           restrictsToSubscriptionModels(

@@ -23,8 +23,10 @@ RUN bun install --frozen-lockfile --ignore-scripts --filter='./cli' --filter='./
       --filter='./gateway' --filter='./credential-executor' --filter='./clients/web' && \
     bun run meta/sync-bundled-copies.ts --plugins-only && \
     bun run assistant/scripts/generate-bundled-plugin-packages.ts
-COPY patches/firefox-request-body.patch /tmp/firefox-request-body.patch
-RUN git apply /tmp/firefox-request-body.patch
+COPY patches/*.patch /tmp/vellum-patches/
+RUN git apply /tmp/vellum-patches/firefox-request-body.patch && \
+    git apply /tmp/vellum-patches/chatgpt-model-catalog.patch && \
+    git apply /tmp/vellum-patches/chatgpt-plan-discovery.patch
 WORKDIR /opt/vellum/clients/web
 RUN bun run openapi-ts && VITE_PLATFORM_MODE=false VITE_APP_VERSION=0.12.7 bun run build
 WORKDIR /opt/vellum
@@ -47,7 +49,7 @@ COPY --from=qdrant /qdrant/qdrant /usr/local/bin/qdrant
 COPY --from=builder /opt/vellum /opt/vellum
 COPY versions.env /opt/vellum/aio/versions.env
 COPY docker/entrypoint docker/vellum-aio /usr/local/bin/
-COPY docker/supervise.py docker/qdrant.yaml docker/setup.ts docker/ingress.ts /opt/vellum/aio/
+COPY docker/supervise.py docker/qdrant.yaml docker/setup.ts docker/ingress.ts docker/chatgpt.ts /opt/vellum/aio/
 ENV HOME=/data/home XDG_CONFIG_HOME=/data/home/.config XDG_DATA_HOME=/data/home/.local/share \
     XDG_STATE_HOME=/data/home/.local/state XDG_CACHE_HOME=/data/home/.cache \
     VELLUM_ENVIRONMENT=production VELLUM_CLOUD=local VELLUM_DISABLE_PLATFORM=1 \

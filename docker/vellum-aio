@@ -22,6 +22,14 @@ case "${1:-status}" in
         exec flock -n -E 75 /run/vellum/setup.lock bun /opt/vellum/aio/setup.ts "$@" ;;
     doctor)
         exec python3 /opt/vellum/aio/supervise.py doctor ;;
+    chatgpt)
+        shift
+        if [ "$(cat /run/vellum/state)" != READY ]; then
+            echo 'Wait for READY before using the assistant.' >&2
+            exit 1
+        fi
+        export VELLUM_WORKSPACE_DIR=/data/home/instance/.vellum/workspace
+        exec bun /opt/vellum/aio/chatgpt.ts "$@" ;;
     pair|client)
         command=$1
         shift
@@ -41,6 +49,6 @@ case "${1:-status}" in
         fi
         exec bun src/index.ts "$command" "$@" ;;
     *)
-        echo 'Usage: vellum-aio {status|setup|pair|client|doctor}' >&2
+        echo 'Usage: vellum-aio {status|setup|pair|client|doctor|chatgpt}' >&2
         exit 2 ;;
 esac
