@@ -10,6 +10,7 @@
   <Support/>
   <Overview>Vellum Assistant 0.12.7. Bind persistent appdata to /data. Open Docker Console and run vellum-aio setup once. On proxynet, Caddy reaches http://vellum-aio:7840.</Overview>
   <Category>Tools:</Category>
+  <Icon>https://raw.githubusercontent.com/rpratama123/vellum-aio/main/unraid/vellum-logo.png</Icon>
   <WebUI/>
   <TemplateURL/>
   <ExtraParams>--stop-timeout=45</ExtraParams>
