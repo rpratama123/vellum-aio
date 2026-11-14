@@ -1,0 +1,5 @@
+/.build/
+/upstream/
+/appdata/
+/docs/vellum_aio_unraid_codex_plan_v2.md
+__pycache__/

@@ -1,0 +1,9 @@
+log_level: WARN
+storage:
+  storage_path: /data/home/qdrant/storage
+  snapshots_path: /data/home/qdrant/snapshots
+service:
+  host: 127.0.0.1
+  http_port: 6333
+  grpc_port: null
+telemetry_disabled: true

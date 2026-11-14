@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container version="2">
+  <Name>vellum-aio</Name>
+  <Repository>ghcr.io/rpratama123/vellum-aio:0.12.7-aio.1</Repository>
+  <Registry>https://ghcr.io</Registry>
+  <Network>proxynet</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support/>
+  <Overview>Vellum Assistant 0.12.7. Bind persistent appdata to /data. Open Docker Console and run vellum-aio setup once. On proxynet, Caddy reaches http://vellum-aio:7840.</Overview>
+  <Category>Tools:</Category>
+  <WebUI/>
+  <TemplateURL/>
+  <ExtraParams>--stop-timeout=45</ExtraParams>
+  <Config Name="Appdata" Target="/data" Default="/mnt/user/appdata/vellum-aio" Mode="rw" Description="Persistent assistant, workspace, credentials, and pairing data" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/vellum-aio</Config>
+  <Config Name="Public HTTPS origin" Target="PUBLIC_BASE_URL" Default="" Mode="" Description="Origin used by vellum-aio pair, for example https://assistant.example.com" Type="Variable" Display="always" Required="false" Mask="false"/>
+  <Config Name="Time zone" Target="TZ" Default="Asia/Jakarta" Mode="" Description="IANA time zone" Type="Variable" Display="advanced" Required="false" Mask="false">Asia/Jakarta</Config>
+</Container>

@@ -1,0 +1,46 @@
+#!/bin/sh
+set -eu
+umask 077
+
+if [ "$(id -u)" = 0 ]; then
+    exec setpriv --reuid=1001 --regid=1001 --clear-groups --no-new-privs "$0" "$@"
+fi
+if [ "$(id -u)" != 1001 ]; then
+    echo 'Run from the Unraid Docker Console as root or UID 1001.' >&2
+    exit 1
+fi
+case "${1:-status}" in
+    status|health)
+        state=$(cat /run/vellum/state 2>/dev/null || echo STARTING)
+        printf '%s\n' "$state"
+        case "$state" in
+            SETUP_REQUIRED|READY) exit 0 ;;
+            *) exit 1 ;;
+        esac ;;
+    setup)
+        shift
+        exec flock -n -E 75 /run/vellum/setup.lock bun /opt/vellum/aio/setup.ts "$@" ;;
+    doctor)
+        exec python3 /opt/vellum/aio/supervise.py doctor ;;
+    pair|client)
+        command=$1
+        shift
+        if [ "$(cat /run/vellum/state)" != READY ]; then
+            echo 'Wait for READY before using the assistant.' >&2
+            exit 1
+        fi
+        cd /opt/vellum/cli
+        if [ "$command" = pair ] && [ -n "${PUBLIC_BASE_URL:-}" ]; then
+            use_default=true
+            for arg do
+                case "$arg" in --url|--web-approve) use_default=false ;; esac
+            done
+            if [ "$use_default" = true ]; then
+                set -- --url "$PUBLIC_BASE_URL" "$@"
+            fi
+        fi
+        exec bun src/index.ts "$command" "$@" ;;
+    *)
+        echo 'Usage: vellum-aio {status|setup|pair|client|doctor}' >&2
+        exit 2 ;;
+esac

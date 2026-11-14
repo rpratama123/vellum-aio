@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+umask 077
+if ! mountpoint -q /data || [ "$(findmnt --target /data --noheadings --output FSTYPE)" = tmpfs ]; then
+    echo 'NEEDS_REPAIR: bind durable appdata to /data' >&2
+    exit 1
+fi
+# Leave existing state ownership unchanged and verify the service user can write.
+if [ ! -e /data/home ]; then
+    install -d -m 0700 -o vellum -g vellum /data/home
+fi
+if [ ! -e /data/.vellum-runtime.lock ]; then
+    install -m 0600 -o vellum -g vellum /dev/null /data/.vellum-runtime.lock
+fi
+install -d -m 0700 -o vellum -g vellum /run/vellum /run/vellum/ipc
+# Docker restart retains the writable layer, so clear state specific to this boot.
+rm -f /run/vellum/state
+exec setpriv --reuid=1001 --regid=1001 --clear-groups --no-new-privs \
+    python3 /opt/vellum/aio/supervise.py

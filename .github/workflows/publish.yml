@@ -1,0 +1,81 @@
+name: Publish Vellum AIO candidate
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Unique candidate tag, for example 0.12.7-aio.1
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: vellum-aio-publish
+  cancel-in-progress: false
+jobs:
+  build-test:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - name: Validate release tag
+        env:
+          RELEASE_TAG: ${{ inputs.release }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^0\.12\.7-aio\.[1-9][0-9]*$ ]]
+      - run: sudo apt-get update && sudo apt-get install -y python3-pexpect
+      - run: scripts/static-checks.sh
+      - name: Build the candidate with repository provenance
+        env:
+          SOURCE_URL: ${{ github.server_url }}/${{ github.repository }}
+          SOURCE_REVISION: ${{ github.sha }}
+        run: |
+          scripts/build-local.sh vellum-aio:release \
+            --label "org.opencontainers.image.source=$SOURCE_URL" \
+            --label "org.opencontainers.image.revision=$SOURCE_REVISION"
+      - run: tests/lifecycle.sh vellum-aio:release
+      - run: scripts/image-evidence.sh vellum-aio:release .build/evidence
+      - run: docker save vellum-aio:release | gzip > .build/evidence/vellum-aio.tar.gz
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: tested-image
+          path: .build/evidence/
+          include-hidden-files: true
+          retention-days: 3
+  push:
+    needs: build-test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: tested-image
+      - name: Push the tested image under a new tag
+        env:
+          RELEASE_TAG: ${{ inputs.release }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          reference="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/vellum-aio:$RELEASE_TAG"
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          if message=$(docker manifest inspect "$reference" 2>&1); then
+            echo "Tag already exists: $reference" >&2
+            exit 1
+          fi
+          if ! grep -Eqi 'manifest unknown|no such manifest|name unknown' <<<"$message"; then
+            printf '%s\n' "$message" >&2
+            exit 1
+          fi
+          gzip -dc vellum-aio.tar.gz | docker load
+          docker tag vellum-aio:release "$reference"
+          docker push "$reference"
+          digest=$(docker image inspect --format '{{range .RepoDigests}}{{println .}}{{end}}' "$reference" |
+            awk -v prefix="${reference%:*}@" 'index($0,prefix)==1{print; exit}')
+          test -n "$digest"
+          printf 'Published `%s`\n\nUnraid image reference: `%s`\n' "$reference" "$digest" | tee -a "$GITHUB_STEP_SUMMARY"
+          docker logout ghcr.io
