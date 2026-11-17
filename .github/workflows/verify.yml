@@ -17,6 +17,11 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y python3-pexpect
       - run: scripts/static-checks.sh
       - run: scripts/build-local.sh vellum-aio:verify
+      - name: Test the Responses provider
+        run: >-
+          docker run --rm --network none --workdir /opt/vellum/assistant
+          --env HOME=/tmp --entrypoint bun vellum-aio:verify
+          test src/__tests__/openai-responses-provider.test.ts
       - run: tests/lifecycle.sh vellum-aio:verify
       - name: Record image and packages
         run: scripts/image-evidence.sh vellum-aio:verify .build/evidence

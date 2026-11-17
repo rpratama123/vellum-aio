@@ -35,6 +35,11 @@ jobs:
           scripts/build-local.sh vellum-aio:release \
             --label "org.opencontainers.image.source=$SOURCE_URL" \
             --label "org.opencontainers.image.revision=$SOURCE_REVISION"
+      - name: Test the Responses provider
+        run: >-
+          docker run --rm --network none --workdir /opt/vellum/assistant
+          --env HOME=/tmp --entrypoint bun vellum-aio:release
+          test src/__tests__/openai-responses-provider.test.ts
       - run: tests/lifecycle.sh vellum-aio:release
       - run: scripts/image-evidence.sh vellum-aio:release .build/evidence
       - run: docker save vellum-aio:release | gzip > .build/evidence/vellum-aio.tar.gz

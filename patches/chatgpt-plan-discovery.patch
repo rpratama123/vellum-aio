@@ -146,10 +146,10 @@ index e616b17..b653a54 100644
        "providers/provider-availability.ts", // provider availability API key check
        "media/image-credentials.ts", // shared image-gen credential resolver (provider API key lookup)
 diff --git a/assistant/src/__tests__/openai-responses-provider.test.ts b/assistant/src/__tests__/openai-responses-provider.test.ts
-index 908614c..2ff2988 100644
+index 908614c..4071767 100644
 --- a/assistant/src/__tests__/openai-responses-provider.test.ts
 +++ b/assistant/src/__tests__/openai-responses-provider.test.ts
-@@ -1848,6 +1848,86 @@ describe("OpenAIResponsesProvider — Native Web Search", () => {
+@@ -1848,6 +1848,167 @@ describe("OpenAIResponsesProvider — Native Web Search", () => {
    // -----------------------------------------------------------------------
    // codexSubscription — parameter stripping
    // -----------------------------------------------------------------------
@@ -207,6 +207,87 @@ index 908614c..2ff2988 100644
 +    ]) {
 +      expect(lastStreamParams).not.toHaveProperty(field);
 +    }
++  });
++
++  test("ChatGPT plan forces a top-level function and replays its tool history", async () => {
++    const provider = new OpenAIResponsesProvider(
++      "fixture-token",
++      "gpt-6-luna",
++      {
++        chatgptPlan: true,
++      },
++    );
++    const name = "record_conversation_title";
++    const inputSchema = {
++      type: "object",
++      properties: { title: { type: "string" } },
++      required: ["title"],
++    };
++    const options = {
++      config: { tool_choice: { type: "tool" as const, name } },
++      tools: [
++        { name, description: "Record a title", input_schema: inputSchema },
++      ],
++    };
++    fakeStreamEvents = [
++      functionCallAddedEvent("call_title", name),
++      functionCallArgsDoneEvent("call_title", name, '{"title":"Test title"}'),
++      completedEvent(10, 5),
++    ];
++    const user = userMsg("Generate a title");
++    const response = await provider.sendMessage([user], options);
++
++    expect(lastStreamParams?.tool_choice).toEqual({ type: "function", name });
++    expect(lastStreamParams?.tools).toEqual([
++      {
++        type: "function",
++        name,
++        description: "Record a title",
++        parameters: inputSchema,
++        strict: null,
++      },
++    ]);
++    expect(response.content).toEqual([
++      {
++        type: "tool_use",
++        id: "call_title",
++        name,
++        input: { title: "Test title" },
++      },
++    ]);
++
++    fakeStreamEvents = [textDeltaEvent("OK"), completedEvent(10, 2)];
++    await provider.sendMessage(
++      [
++        user,
++        { role: "assistant", content: response.content },
++        {
++          role: "user",
++          content: [
++            {
++              type: "tool_result",
++              tool_use_id: "call_title",
++              content: "Recorded",
++            },
++          ],
++        },
++      ],
++      options,
++    );
++    const input = lastStreamParams?.input as unknown[];
++    expect(input.slice(1)).toEqual([
++      {
++        type: "function_call",
++        call_id: "call_title",
++        name,
++        arguments: '{"title":"Test title"}',
++      },
++      {
++        type: "function_call_output",
++        call_id: "call_title",
++        output: "Recorded",
++      },
++    ]);
 +  });
 +
 +  test("ChatGPT plan reports a failed stream even after text arrives", async () => {
@@ -1563,7 +1644,7 @@ index 0000000..1f8525b
 +  return /^credential\/chatgpt-plan\/[a-f0-9]{64}$/.test(credential);
 +}
 diff --git a/assistant/src/providers/openai/responses-provider.ts b/assistant/src/providers/openai/responses-provider.ts
-index b400230..04173c9 100644
+index b400230..1ed91c7 100644
 --- a/assistant/src/providers/openai/responses-provider.ts
 +++ b/assistant/src/providers/openai/responses-provider.ts
 @@ -49,6 +49,7 @@ export interface OpenAIResponsesProviderOptions {
@@ -1615,10 +1696,26 @@ index b400230..04173c9 100644
        // Capture the raw non-2xx body before the SDK parses (and drops) it.
        fetch: captureRawErrorBodyFetch,
      });
-@@ -300,11 +308,12 @@ export class OpenAIResponsesProvider implements Provider {
+@@ -299,12 +307,27 @@ export class OpenAIResponsesProvider implements Provider {
+     try {
        const effectiveModel = modelOverride ?? this.model;
        recordProviderRequestDiagnostics({ model_id: effectiveModel });
-       const input = await this.toResponsesInput(messages);
+-      const input = await this.toResponsesInput(messages);
++      const toolChoice = tools?.length
++        ? mapNeutralToolChoiceForResponses(configObj?.tool_choice)
++        : undefined;
++      const nativeSearch =
++        this.useNativeWebSearch &&
++        tools?.some((tool) => tool.name === "web_search") === true;
++      const forceNativeSearch =
++        nativeSearch &&
++        typeof toolChoice === "object" &&
++        toolChoice.name === "web_search";
++      // A named function choice on Responses resolves only top-level functions.
++      const namespaceFunctions =
++        this.chatgptPlan &&
++        (typeof toolChoice !== "object" || forceNativeSearch);
++      const input = await this.toResponsesInput(messages, namespaceFunctions);
 +      const subscription = this.codexSubscription || this.chatgptPlan;
  
        const params: Record<string, unknown> = {
@@ -1629,7 +1726,7 @@ index b400230..04173c9 100644
        };
  
        if (systemPrompt) {
-@@ -322,7 +331,7 @@ export class OpenAIResponsesProvider implements Provider {
+@@ -322,7 +345,7 @@ export class OpenAIResponsesProvider implements Provider {
        // breakpoint-capable models (which additionally opt into explicit mode
        // below) and implicit-mode models, which carry no explicit breakpoints,
        // still gain prefix-cache routing affinity from a stable key.
@@ -1638,7 +1735,7 @@ index b400230..04173c9 100644
          params.prompt_cache_key = promptCacheKey;
        }
  
-@@ -340,7 +349,7 @@ export class OpenAIResponsesProvider implements Provider {
+@@ -340,7 +363,7 @@ export class OpenAIResponsesProvider implements Provider {
        // stay off there. Codex runs in implicit prefix-cache mode and relies
        // on `prompt_cache_key` above for routing affinity.
        if (
@@ -1647,7 +1744,7 @@ index b400230..04173c9 100644
          PROMPT_CACHE_BREAKPOINT_MODEL_IDS.has(effectiveModel)
        ) {
          params.prompt_cache_options = { mode: "explicit" };
-@@ -349,14 +358,17 @@ export class OpenAIResponsesProvider implements Provider {
+@@ -349,14 +372,17 @@ export class OpenAIResponsesProvider implements Provider {
          }
        }
  
@@ -1667,7 +1764,7 @@ index b400230..04173c9 100644
          // Request a human-readable reasoning summary whenever the model will
          // reason — without it the Responses API emits no visible thinking at
          // all. "auto" resolves to the richest level the model supports
-@@ -367,12 +379,13 @@ export class OpenAIResponsesProvider implements Provider {
+@@ -367,12 +393,13 @@ export class OpenAIResponsesProvider implements Provider {
          // forces `store: false` and rejects `max_output_tokens`), so its
          // wire shape is left untouched.
          params.reasoning =
@@ -1682,53 +1779,56 @@ index b400230..04173c9 100644
          verbosity &&
          VALID_VERBOSITIES.has(verbosity) &&
          modelSupportsVerbosity(modelOverride ?? this.model)
-@@ -390,7 +403,44 @@ export class OpenAIResponsesProvider implements Provider {
+@@ -390,7 +417,37 @@ export class OpenAIResponsesProvider implements Provider {
        // compatible connections, which use the chat-completions client, honor
        // `top_p` normally.
  
 -      if (tools && tools.length > 0) {
 +      if (this.chatgptPlan && tools && tools.length > 0) {
-+        const nativeSearch =
-+          this.useNativeWebSearch &&
-+          tools.some((tool) => tool.name === "web_search");
-+        const functions = tools.filter(
-+          (tool) => !nativeSearch || tool.name !== "web_search",
-+        );
++        const functions = tools
++          .filter((tool) => !nativeSearch || tool.name !== "web_search")
++          .map((tool) => ({
++            type: "function" as const,
++            name: tool.name,
++            description: tool.description,
++            parameters: tool.input_schema,
++            strict: null,
++          }));
 +        params.tools = [
-+          ...(functions.length > 0
++          ...(namespaceFunctions && functions.length > 0
 +            ? [
 +                {
 +                  type: "namespace",
 +                  name: "vellum",
 +                  description: "Tools available to the Vellum assistant.",
-+                  tools: functions.map((tool) => ({
-+                    type: "function",
-+                    name: tool.name,
-+                    description: tool.description,
-+                    parameters: tool.input_schema,
-+                    strict: null,
-+                  })),
++                  tools: functions,
 +                },
 +              ]
-+            : []),
++            : functions),
 +          ...(nativeSearch
 +            ? [{ type: "web_search", external_web_access: false }]
 +            : []),
 +        ];
-+        const choice = mapNeutralToolChoiceForResponses(configObj?.tool_choice);
-+        if (choice !== undefined) {
-+          params.tool_choice =
-+            typeof choice === "object"
-+              ? nativeSearch && choice.name === "web_search"
-+                ? { type: "web_search" }
-+                : { ...choice, namespace: "vellum" }
-+              : choice;
++        if (toolChoice !== undefined) {
++          params.tool_choice = forceNativeSearch
++            ? { type: "web_search" }
++            : toolChoice;
 +        }
 +      } else if (tools && tools.length > 0) {
          if (
            this.useNativeWebSearch &&
            tools.some((t) => t.name === "web_search")
-@@ -585,6 +635,16 @@ export class OpenAIResponsesProvider implements Provider {
+@@ -420,9 +477,6 @@ export class OpenAIResponsesProvider implements Provider {
+         // Honor a caller-supplied tool_choice (e.g. `{ type: "none" }` to force
+         // a text-only answer, or `{ type: "tool", name }` for a forced call).
+         // Only meaningful when tools are present.
+-        const toolChoice = mapNeutralToolChoiceForResponses(
+-          configObj?.tool_choice,
+-        );
+         if (toolChoice !== undefined) {
+           params.tool_choice = toolChoice;
+         }
+@@ -585,6 +639,16 @@ export class OpenAIResponsesProvider implements Provider {
                break;
              }
  
@@ -1745,7 +1845,7 @@ index b400230..04173c9 100644
              case "response.completed":
              case "response.incomplete": {
                const response = event.response;
-@@ -629,6 +689,12 @@ export class OpenAIResponsesProvider implements Provider {
+@@ -629,6 +693,12 @@ export class OpenAIResponsesProvider implements Provider {
          cleanupTimeout();
        }
  
@@ -1758,11 +1858,45 @@ index b400230..04173c9 100644
        // Build content blocks.
        // Inject server_tool_use + web_search_tool_result pairs before text so
        // conversation history matches the shape Anthropic produces for native
-@@ -995,6 +1061,7 @@ export class OpenAIResponsesProvider implements Provider {
+@@ -832,7 +902,10 @@ export class OpenAIResponsesProvider implements Provider {
+    *
+    * System prompt is NOT included here — it goes into the `instructions` param.
+    */
+-  private async toResponsesInput(messages: Message[]): Promise<unknown[]> {
++  private async toResponsesInput(
++    messages: Message[],
++    namespaceFunctions: boolean,
++  ): Promise<unknown[]> {
+     // Swap any persisted attachment references back to inline base64 before
+     // serializing, so the block transforms below can read `source.data`.
+     messages = await resolveMediaReferences(messages);
+@@ -845,7 +918,12 @@ export class OpenAIResponsesProvider implements Provider {
+     const emittedCallIds = new Set<string>();
+     for (const msg of messages) {
+       if (msg.role === "assistant") {
+-        this.appendAssistantItems(result, msg, emittedCallIds);
++        this.appendAssistantItems(
++          result,
++          msg,
++          emittedCallIds,
++          namespaceFunctions,
++        );
+       } else {
+         this.appendUserItems(result, msg, emittedCallIds);
+       }
+@@ -973,6 +1051,7 @@ export class OpenAIResponsesProvider implements Provider {
+     result: unknown[],
+     msg: Message,
+     emittedCallIds: Set<string>,
++    namespaceFunctions: boolean,
+   ): void {
+     const textParts: string[] = [];
+
+@@ -995,6 +1074,7 @@ export class OpenAIResponsesProvider implements Provider {
              type: "function_call",
              call_id: block.id,
              name: block.name,
-+            ...(this.chatgptPlan ? { namespace: "vellum" } : {}),
++            ...(namespaceFunctions ? { namespace: "vellum" } : {}),
              arguments: JSON.stringify(block.input),
            });
            emittedCallIds.add(block.id);
