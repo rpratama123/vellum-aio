@@ -2,7 +2,7 @@
 set -eu
 cd "$(dirname "$0")/.."
 scripts/verify-pins.sh
-for file in docker/entrypoint docker/vellum-aio scripts/*.sh tests/*.sh; do
+for file in docker/assistant docker/entrypoint docker/vellum-aio scripts/*.sh tests/*.sh; do
     bash -n "$file"
 done
 python3 - <<'PY'

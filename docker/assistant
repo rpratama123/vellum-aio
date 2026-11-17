@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+export VELLUM_WORKSPACE_DIR="${VELLUM_WORKSPACE_DIR:-/data/home/instance/.vellum/workspace}"
+exec /usr/local/bin/bun /opt/vellum/assistant/src/index.ts "$@"

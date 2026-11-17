@@ -61,6 +61,13 @@ fi
 python3 tests/interactive-setup.py "$name"
 wait_for READY
 "$engine" exec "$name" vellum-aio doctor
+"$engine" exec --tty --user 1001:1001 "$name" bash -ilc 'assistant --version'
+"$engine" exec --user 1001:1001 "$name" env -u VELLUM_WORKSPACE_DIR bash -e -o pipefail -c '
+    test "$(command -v assistant)" = /usr/local/bin/assistant
+    test "$(command -v vellum)" = /usr/local/bin/vellum
+    assistant schedules list --json | jq -e "type == \"array\" or type == \"object\"" >/dev/null
+    test "$(vellum --version)" = "$(assistant --version)"
+'
 if "$engine" exec "$name" vellum-aio setup </dev/null; then
     echo 'Duplicate setup succeeded' >&2
     exit 1

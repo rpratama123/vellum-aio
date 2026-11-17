@@ -48,7 +48,8 @@ COPY --from=builder /usr/local/bin/bun /usr/local/bin/bun
 COPY --from=qdrant /qdrant/qdrant /usr/local/bin/qdrant
 COPY --from=builder /opt/vellum /opt/vellum
 COPY versions.env /opt/vellum/aio/versions.env
-COPY docker/entrypoint docker/vellum-aio /usr/local/bin/
+COPY docker/entrypoint docker/vellum-aio docker/assistant /usr/local/bin/
+RUN ln -s assistant /usr/local/bin/vellum
 COPY docker/supervise.py docker/qdrant.yaml docker/setup.ts docker/ingress.ts docker/chatgpt.ts /opt/vellum/aio/
 ENV HOME=/data/home XDG_CONFIG_HOME=/data/home/.config XDG_DATA_HOME=/data/home/.local/share \
     XDG_STATE_HOME=/data/home/.local/state XDG_CACHE_HOME=/data/home/.cache \
